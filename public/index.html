@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Clutch Studios — RGS Demo</title>
+<style>
+  :root{ --ink:#0a0b10; --panel:#12141d; --line:#222637; --txt:#e9ecf5; --mut:#8b93ad;
+    --c1:#22d3ee; --c2:#a855f7; --c3:#f472b6; --grad:linear-gradient(120deg,#22d3ee,#a855f7,#f472b6); }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{ background:radial-gradient(1200px 700px at 50% -10%, #1a1030 0%, var(--ink) 60%) fixed;
+    color:var(--txt); font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh; padding:48px 20px; }
+  .wrap{max-width:980px;margin:0 auto}
+  .eyebrow{ letter-spacing:.22em; text-transform:uppercase; font-size:12px; color:var(--mut); font-weight:700 }
+  h1{ font-size:clamp(34px,6vw,58px); line-height:1.04; margin:.3em 0 .2em; font-weight:800;
+    background:linear-gradient(120deg,#22d3ee,#a855f7,#f472b6); -webkit-background-clip:text; background-clip:text; color:transparent }
+  .sub{ color:var(--mut); max-width:62ch; font-size:18px }
+  .cards{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:40px 0 26px }
+  @media(max-width:680px){ .cards{grid-template-columns:1fr} }
+  .card{ background:linear-gradient(180deg,var(--panel),#0d0f17); border:1px solid var(--line);
+    border-radius:18px; padding:26px; text-decoration:none; color:inherit; display:block;
+    transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; position:relative; overflow:hidden }
+  .card:hover{ transform:translateY(-3px); border-color:#3a4063; box-shadow:0 18px 50px -20px rgba(168,85,247,.5) }
+  .card .emoji{ font-size:42px } .card h3{ margin:.5em 0 .2em; font-size:22px }
+  .card p{ color:var(--mut); margin:.3em 0 1em; min-height:48px }
+  .tag{ display:inline-block; font-size:12px; font-weight:700; letter-spacing:.04em; padding:5px 10px; border-radius:999px;
+    background:rgba(34,211,238,.12); color:#7fe6f6; border:1px solid rgba(34,211,238,.25) }
+  .tag.p{ background:rgba(168,85,247,.12); color:#c9a3f5; border-color:rgba(168,85,247,.28) }
+  .play{ display:inline-flex; align-items:center; gap:8px; font-weight:700; color:#fff;
+    background:var(--grad); padding:10px 16px; border-radius:10px; margin-top:6px }
+  .meta{ display:flex; gap:18px; flex-wrap:wrap; color:var(--mut); font-size:14px; margin-top:18px }
+  .meta a{ color:#9fb0d6; text-decoration:none; border-bottom:1px dotted #46506f } .meta a:hover{ color:#fff }
+  .note{ margin-top:34px; padding:18px 20px; border:1px solid var(--line); border-radius:14px; background:#0d0f17;
+    color:var(--mut); font-size:14px }
+  .note b{ color:var(--txt) } code{ background:#1a1d2b; padding:2px 6px; border-radius:6px; color:#cdd6f4; font-size:13px }
+  footer{ color:var(--mut); font-size:13px; margin-top:30px; text-align:center }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Clutch Studios · Remote Gaming Server</div>
+  <h1>Two games. One integration.</h1>
+  <p class="sub">A live, server-authoritative, provably-fair demo. Both titles run on the same RGS — the same wallet, the same seed-chain fairness, the same socket. Play them below.</p>
+
+  <div class="cards">
+    <a class="card" href="/ascent/">
+      <div class="emoji">🚀</div>
+      <span class="tag">Crash · multiplayer rounds</span>
+      <h3>Ascent</h3>
+      <p>The classic rising-multiplier crash game. Shared rounds, cash out before the bust. Auto-cashout supported.</p>
+      <span class="play">Play Ascent →</span>
+    </a>
+    <a class="card" href="/cross/">
+      <div class="emoji">🧑‍🚀</div>
+      <span class="tag p">Step-multiplier · single player</span>
+      <h3>Ascent Cross</h3>
+      <p>Climb platform by platform. Each step pays more — but one lane hides a meteor. Cash out or push your luck.</p>
+      <span class="play">Play Ascent Cross →</span>
+    </a>
+  </div>
+
+  <div class="meta">
+    <span>Verify fairness:</span>
+    <a href="/fairness" target="_blank">/fairness (Ascent)</a>
+    <a href="/fairness/cross" target="_blank">/fairness/cross</a>
+    <a href="/games" target="_blank">/games</a>
+    <a href="/health" target="_blank">/health</a>
+  </div>
+
+  <div class="note">
+    <b>For aggregators & operators.</b> This is a demonstration build in play-money mode — balances reset, no real funds.
+    Outcomes, balances and round timing are decided <b>server-side</b>; the browser is a thin renderer. Every round is
+    provably fair: the server seed is committed before play (a pre-published hash chain) and revealed for verification.
+    The integration surface is a single WebSocket + an idempotent wallet (debit / credit / rollback by <code>txId</code>) —
+    one connection serves the whole catalogue. Want the data sheet or a seamless-wallet sandbox? <b>hello@clutchstudios.co</b>
+  </div>
+
+  <footer>© Clutch Studios · demo environment · not for real-money play</footer>
+</div>
+</body>
+</html>

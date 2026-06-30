@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Ascent Cross — prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --cyan:#22D3EE;--pink:#FF2E97;--green:#2BFF88;--gold:#FFD23F;--orange:#FF9F1C;--rug:#FF3653;
+    --bg:#0c0a1a;--panel:#160833;--panel2:#1d0f3d;--text:#fff;--muted:#9E96C0;
+    --display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:
+      radial-gradient(circle at 12% 12%,rgba(34,211,238,.18),transparent 45%),
+      radial-gradient(circle at 88% 8%,rgba(255,46,151,.16),transparent 45%),
+      radial-gradient(circle at 50% 100%,rgba(255,210,63,.12),transparent 50%),var(--bg);
+    color:#fff;font-family:var(--display);display:flex;align-items:flex-start;justify-content:center;
+    min-height:100vh;padding:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden;touch-action:manipulation}
+  .app{width:100%;max-width:920px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .logo{font-weight:700;font-size:26px;letter-spacing:-.5px;
+    background:linear-gradient(90deg,var(--cyan),var(--pink) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .logo small{-webkit-text-fill-color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:1px;font-weight:400;margin-left:8px}
+  .bal{font-family:var(--mono);font-size:14px;color:var(--gold)}.bal b{color:#fff}
+
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  @media(max-width:620px){.controls{grid-template-columns:1fr}}
+  .field{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 14px}
+  .field label{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+  .diffs{display:flex;gap:6px;flex-wrap:wrap}
+  .diff{flex:1;min-width:64px;font-family:var(--display);font-weight:600;font-size:13px;padding:8px 4px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.04);color:var(--muted);cursor:pointer;text-align:center;transition:.15s}
+  .diff.on{color:#1a0833;background:linear-gradient(135deg,var(--cyan),var(--green));border-color:transparent}
+  .betrow{display:flex;align-items:center;gap:8px}
+  .betrow input{flex:1;background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none}
+  .mini{font-family:var(--mono);font-size:12px;color:var(--muted);background:rgba(255,255,255,.07);border-radius:7px;padding:6px 9px;cursor:pointer;user-select:none}
+  .mini:hover{color:#fff;background:rgba(255,255,255,.14)}
+
+  .stage{position:relative;border-radius:18px;overflow:hidden;background:
+      repeating-linear-gradient(180deg,#0a1430,#0a1430 2px,#0c1838 2px,#0c1838 4px),#0a0f24;
+    box-shadow:0 18px 60px rgba(34,211,238,.18),inset 0 0 60px rgba(255,46,151,.06),0 0 0 1px rgba(255,255,255,.08);
+    padding:14px 12px}
+  .hud{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:10px}
+  .hud .mult{font-family:var(--display);font-weight:700;font-size:30px;color:var(--cyan);text-shadow:0 0 26px rgba(34,211,238,.55)}
+  .hud .mult.dead{color:var(--rug);text-shadow:0 0 26px rgba(255,54,83,.6)}
+  .track{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 12px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+  .track::-webkit-scrollbar{height:6px}.track::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
+  .lane{flex:0 0 92px;height:148px;border-radius:14px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+    background:linear-gradient(180deg,#13284f,#0e1c3a);border:1px solid rgba(255,255,255,.07);transition:.2s}
+  .lane.start{background:linear-gradient(180deg,#1d3a1f,#0f2410);flex-basis:74px}
+  .lane.done{filter:saturate(.6) brightness(.8)}
+  .lane.cur{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(34,211,238,.5),0 0 24px rgba(34,211,238,.35)}
+  .lane.hazard{background:linear-gradient(180deg,#3a1320,#240b12);border-color:var(--rug)}
+  .lane .mx{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold);margin-bottom:8px}
+  .lane.cur .mx{color:var(--cyan)}
+  .lane .char{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:30px;transition:transform .18s;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+  .lane .haz{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);font-size:30px;opacity:0}
+  .lane.hazard .haz{opacity:1}
+  .lane .water{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(34,211,238,.06),rgba(34,211,238,.06) 6px,transparent 6px,transparent 12px);pointer-events:none}
+  @keyframes hop{0%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-14px)}100%{transform:translateX(-50%) translateY(0)}}
+  .hop{animation:hop .25s ease}
+  @keyframes splat{0%{transform:translate(-50%,-50%) scale(.4) rotate(0)}40%{transform:translate(-50%,-50%) scale(1.3) rotate(15deg)}100%{transform:translate(-50%,-50%) scale(1) rotate(0)}}
+  .splat{animation:splat .5s ease}
+
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .actions button{height:60px;border:none;border-radius:14px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:19px;color:#1a0833;transition:transform .05s,filter .15s}
+  .actions button:active{transform:scale(.98)}
+  .actions button:disabled{opacity:.4;cursor:not-allowed}
+  .btn-buy{background:linear-gradient(135deg,var(--cyan),var(--green));box-shadow:0 8px 24px rgba(43,255,136,.35);grid-column:1/-1}
+  .btn-step{background:linear-gradient(135deg,var(--pink),var(--orange));box-shadow:0 8px 24px rgba(255,46,151,.35)}
+  .btn-cash{background:linear-gradient(135deg,var(--gold),var(--orange));color:#2a1500;box-shadow:0 8px 24px rgba(255,210,63,.4)}
+  .btn-cash .sub{display:block;font-family:var(--mono);font-size:12px;font-weight:400;opacity:.85}
+
+  .fair{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7;word-break:break-all}
+  .fair b{color:var(--cyan)}
+  footer{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+  .msg{font-family:var(--mono);font-size:13px;color:#fff;min-height:18px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">Ascent&nbsp;Cross<small>step-multiplier prototype</small></div>
+    <div class="bal"><b id="bal">1,000.00</b> credits</div>
+  </header>
+
+  <div class="controls">
+    <div class="field">
+      <label>difficulty</label>
+      <div class="diffs" id="diffs"></div>
+    </div>
+    <div class="field">
+      <label>buy amount</label>
+      <div class="betrow">
+        <input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal" />
+        <span class="mini" data-act="half">½</span>
+        <span class="mini" data-act="double">2×</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="hud">
+      <span id="status">pick a difficulty &amp; buy in</span>
+      <span class="mult" id="mult">1.00×</span>
+    </div>
+    <div class="track" id="track"></div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-buy" id="buy">Buy in</button>
+    <button class="btn-step" id="step" disabled style="display:none">Hop →</button>
+    <button class="btn-cash" id="cash" disabled style="display:none">Cash out<span class="sub" id="cashsub">—</span></button>
+  </div>
+
+  <div class="fair" id="fair">fair commit <b id="commit">—</b></div>
+  <footer>Play credits only — prototype. Discrete step-multiplier crossing. RTP 97% (operator-configurable), one transparent edge. Each lane is an independent provably-fair roll; rug lane precommitted (hash before, seed after).</footer>
+</div>
+
+<script type="module">
+// ---- math: IDENTICAL formulas to ascent-rgs/src/engine/stepcross.ts + provablyfair.ts ----
+const EDGE = 0.03;
+const DIFF = {
+  easy:     { lanes: 24, survival: 0.88, char: "🐸" },
+  medium:   { lanes: 22, survival: 0.78, char: "🐸" },
+  hard:     { lanes: 20, survival: 0.66, char: "🐸" },
+  hardcore: { lanes: 18, survival: 0.50, char: "🐸" },
+};
+const HAZARDS = ["🐊","🪵","🌊"];
+const stepMultiplier = (k, s) => Math.floor(((1 - EDGE) / Math.pow(s, k)) * 100) / 100;
+const enc = new TextEncoder();
+const hex = (buf) => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+async function sha256(str){ return hex(await crypto.subtle.digest("SHA-256", enc.encode(str))); }
+async function hmacFloat(serverSeed, clientSeed, nonce, tag){
+  const key = await crypto.subtle.importKey("raw", enc.encode(serverSeed), {name:"HMAC",hash:"SHA-256"}, false, ["sign"]);
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, enc.encode(`${clientSeed}:${nonce}:${tag}`)));
+  let r = 0; for (let i=0;i<6;i++) r = r*256 + mac[i];
+  return r / 2**48; // first 48 bits, matches floatFor()
+}
+async function failLane(serverSeed, clientSeed, nonce, cfg){
+  for (let i=1;i<=cfg.lanes;i++){
+    const r = await hmacFloat(serverSeed, clientSeed, nonce, `stepcross:${i}`);
+    if (r >= cfg.survival) return i;            // hazard on entering lane i
+  }
+  return cfg.lanes + 1;                          // cleared the board
+}
+const randomHex = (n) => { const b=new Uint8Array(n); crypto.getRandomValues(b); return hex(b); };
+
+// ---- state ----
+const $ = (id) => document.getElementById(id);
+let balance = 1000, diff = "medium", nonce = 0;
+let round = null; // { stake, cfg, serverSeed, clientSeed, commit, fail, lane }
+
+function fmt(n){ return n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function setBal(){ $("bal").textContent = fmt(balance); }
+
+// difficulty buttons
+const diffEl = $("diffs");
+for (const d of Object.keys(DIFF)){
+  const b = document.createElement("div");
+  b.className = "diff" + (d===diff?" on":""); b.textContent = d; b.dataset.d = d;
+  b.onclick = () => { if (round) return; diff = d; [...diffEl.children].forEach(c=>c.classList.toggle("on",c.dataset.d===d)); renderTrack(); };
+  diffEl.appendChild(b);
+}
+$("track").addEventListener("scroll",()=>{},{passive:true});
+document.querySelectorAll(".mini").forEach(m=>m.onclick=()=>{
+  const v=parseFloat($("bet").value)||0; $("bet").value = m.dataset.act==="half"?Math.max(1,Math.floor(v/2)):Math.max(1,Math.floor(v*2));
+});
+
+function renderTrack(){
+  const cfg = DIFF[diff]; const track = $("track"); track.innerHTML = "";
+  const start = document.createElement("div"); start.className="lane start"; start.id="lane-0";
+  start.innerHTML = `<div class="char" id="char">${cfg.char}</div><div class="mx">start</div>`;
+  track.appendChild(start);
+  for (let i=1;i<=cfg.lanes;i++){
+    const el = document.createElement("div"); el.className="lane"; el.id="lane-"+i;
+    el.innerHTML = `<div class="water"></div><div class="haz"></div><div class="mx">${stepMultiplier(i,cfg.survival)}×</div>`;
+    track.appendChild(el);
+  }
+}
+function laneEl(i){ return $("lane-"+i); }
+function moveChar(toLane, hop){
+  const char = $("char"); if(!char) return;
+  const el = laneEl(toLane); el.appendChild(char);
+  if (hop){ char.classList.remove("hop"); void char.offsetWidth; char.classList.add("hop"); }
+  el.scrollIntoView({inline:"center",block:"nearest"});
+}
+
+async function buyIn(){
+  const stake = Math.floor(parseFloat($("bet").value)||0);
+  if (!(stake>0)) return setMsg("enter a buy amount");
+  if (stake>balance) return setMsg("insufficient balance");
+  const cfg = DIFF[diff];
+  balance -= stake; setBal();
+  const serverSeed = randomHex(16), clientSeed = randomHex(8);
+  $("commit").textContent = "…";
+  const commit = await sha256(serverSeed);
+  const fail = await failLane(serverSeed, clientSeed, nonce, cfg);
+  round = { stake, cfg, serverSeed, clientSeed, commit, fail, lane:0 };
+  $("commit").textContent = "sha256:" + commit.slice(0,28) + "…  (seed revealed at round end)";
+  renderTrack(); moveChar(0,false);
+  $("mult").textContent = "1.00×"; $("mult").classList.remove("dead");
+  setMsg("hop forward — cash out before the river takes you");
+  show("buy",false); show("step",true); show("cash",true);
+  $("step").disabled=false; $("cash").disabled=true; // can't cash at lane 0 (no win yet)
+}
+
+function hop(){
+  if(!round) return;
+  const next = round.lane + 1;
+  if (next === round.fail){            // walked into the hazard
+    round.lane = next;
+    const el = laneEl(next); el.classList.add("hazard");
+    el.querySelector(".haz").textContent = HAZARDS[Math.floor(Math.random()*HAZARDS.length)];
+    const char=$("char"); if(char){ char.textContent="💥"; char.classList.add("splat"); el.appendChild(char); el.scrollIntoView({inline:"center"}); }
+    $("mult").textContent = "RUGGED"; $("mult").classList.add("dead");
+    endRound(`the river got you on lane ${next} — lost ${fmt(round.stake)}`);
+    return;
+  }
+  // survived
+  laneEl(round.lane).classList.add("done");
+  round.lane = next;
+  laneEl(next).classList.add("cur");
+  if (round.lane>1) laneEl(round.lane-1).classList.remove("cur");
+  moveChar(next,true);
+  const m = stepMultiplier(round.lane, round.cfg.survival);
+  $("mult").textContent = m.toFixed(2)+"×";
+  $("cash").disabled=false; $("cashsub").textContent = fmt(round.stake*m)+" credits";
+  setMsg(`lane ${round.lane}/${round.cfg.lanes} · ${m.toFixed(2)}× · hop again or cash out`);
+  if (round.lane === round.cfg.lanes){ setMsg(`cleared the board! cash out ${fmt(round.stake*m)}`); $("step").disabled=true; }
+}
+
+function cashOut(){
+  if(!round || round.lane<1) return;
+  const m = stepMultiplier(round.lane, round.cfg.survival);
+  const payout = round.stake*m; balance += payout; setBal();
+  $("mult").textContent = m.toFixed(2)+"×";
+  endRound(`cashed out ${fmt(payout)} at ${m.toFixed(2)}× 🎉`);
+}
+
+function endRound(message){
+  $("step").disabled=true; $("cash").disabled=true;
+  const r = round;
+  $("fair").innerHTML = `<b>verify:</b> serverSeed <b>${r.serverSeed}</b> · clientSeed <b>${r.clientSeed}</b> · nonce ${nonce} · ` +
+    `SHA-256(serverSeed)===commit ✓ · rug lane = ${r.fail>r.cfg.lanes?"none (clearable)":r.fail}`;
+  nonce++; round=null;
+  setTimeout(()=>{ show("step",false); show("cash",false); show("buy",true); }, 100);
+  setMsg(message);
+}
+
+function setMsg(t){ $("status").textContent = t; }
+function show(id,on){ $(id).style.display = on?"":"none"; }
+
+$("buy").onclick = ()=>buyIn();
+$("step").onclick = ()=>hop();
+$("cash").onclick = ()=>cashOut();
+setBal(); renderTrack();
+</script>
+</body>
+</html>

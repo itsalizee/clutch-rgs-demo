@@ -1,0 +1,15 @@
+# Render Blueprint — one-click deploy of the Clutch Studios RGS demo.
+# In Render: New > Blueprint > connect this repo. It reads this file, builds the
+# Dockerfile, and gives you a public https URL serving both games.
+services:
+  - type: web
+    name: clutch-rgs-demo
+    runtime: docker
+    plan: free          # free tier sleeps after inactivity; upgrade to "starter" for always-on
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Block-hash external entropy makes a stronger fairness story but does an
+      # outbound fetch on each round (it has a safe fallback). Set "0" to disable.
+      - key: EXTERNAL_ENTROPY
+        value: "1"

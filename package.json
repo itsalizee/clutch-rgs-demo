@@ -1,0 +1,30 @@
+{
+  "name": "ascent-rgs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Ascent RGS — server-authoritative Remote Gaming Server for the Ascent crash game. Provably-fair, seamless-wallet, aggregator-adapter architecture. Built to be GLI/iTech certifiable.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "tsx watch src/server/main.ts",
+    "start": "tsx src/server/main.ts",
+    "start:hosted": "tsx src/server/hosted.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "rtp": "tsx scripts/rtp-harness.ts",
+    "datasheet": "tsx scripts/datasheet.ts",
+    "smoke": "tsx reference-client/smoke.ts"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/ws": "^8.5.13",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
