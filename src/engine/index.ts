@@ -7,3 +7,4 @@ export * from "./seedchain";
 export * from "./entropy";
 export * from "./external-entropy";
 export * from "./stepcross";
+export * from "./mines";

@@ -30,6 +30,8 @@ import { Orchestrator } from "./orchestrator.js";
 import { attachCrashWs, crashHttpRoutes, type GameHost } from "./ws.js";
 import { CrossEngine } from "../games/crossing/engine.js";
 import { CrossOrchestrator, attachCrossWs, crossHttpRoutes } from "../games/crossing/server.js";
+import { VaultEngine } from "../games/vault/engine.js";
+import { VaultOrchestrator, attachVaultWs, vaultHttpRoutes } from "../games/vault/server.js";
 import { minor, MixedEntropySource, BlockHashEntropyProvider } from "../engine/index.js";
 
 const PORT = Number(process.env.PORT ?? 8080);
@@ -86,6 +88,18 @@ const crossOrchestrator = new CrossOrchestrator({
   ensureDemoSession: (sid) => wallet.ensureSession(sid),
 });
 
+// ---- Vault (mines) game (a genuinely new mechanic) ------------------------
+const vaultEngine = new VaultEngine({
+  randomBytes: (n) => webcrypto.getRandomValues(new Uint8Array(n)),
+  chainLength: Number(process.env.CHAIN_LENGTH ?? 50_000),
+  entropy: new MixedEntropySource(),
+  edge: operator.edge,
+});
+const vaultOrchestrator = new VaultOrchestrator({
+  engine: vaultEngine, wallet, operator, txLog: new MemoryTxLog(),
+  ensureDemoSession: (sid) => wallet.ensureSession(sid),
+});
+
 // ---- Static file serving ---------------------------------------------------
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
@@ -116,8 +130,10 @@ async function serveStatic(req: IncomingMessage, res: ServerResponse): Promise<v
 const crashRoutes = crashHttpRoutes(games, DEFAULT_GAME_ID, () =>
   GAMES.map((g) => ({ id: g.id, name: g.name, type: g.type, blurb: g.blurb, ux: g.ux })));
 const crossRoutes = crossHttpRoutes(() => crossEngine.fairness);
+const vaultRoutes = vaultHttpRoutes(() => vaultEngine.fairness);
 
 const http = createServer((req, res) => {
+  if (vaultRoutes(req, res)) return;     // /fairness/vault
   if (crossRoutes(req, res)) return;     // /fairness/cross
   if (crashRoutes(req, res)) return;     // /health, /games, /fairness
   void serveStatic(req, res);
@@ -126,13 +142,17 @@ const http = createServer((req, res) => {
 // ---- WebSocket routing by path ---------------------------------------------
 const crashWss = new WebSocketServer({ noServer: true });
 const crossWss = new WebSocketServer({ noServer: true });
+const vaultWss = new WebSocketServer({ noServer: true });
 attachCrashWs(crashWss, games, DEFAULT_GAME_ID);
 attachCrossWs(crossWss, crossOrchestrator);
+attachVaultWs(vaultWss, vaultOrchestrator);
 
 http.on("upgrade", (req, socket, head) => {
   const path = (req.url ?? "").split("?")[0]!;
   if (path === "/ws/cross") {
     crossWss.handleUpgrade(req, socket, head, (ws) => crossWss.emit("connection", ws, req));
+  } else if (path === "/ws/vault") {
+    vaultWss.handleUpgrade(req, socket, head, (ws) => vaultWss.emit("connection", ws, req));
   } else if (path === "/ws" || path === "/ws/ascent") {
     crashWss.handleUpgrade(req, socket, head, (ws) => crashWss.emit("connection", ws, req));
   } else {
