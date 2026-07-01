@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Overdrive — provably-fair car crash demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --red:#FF3B30;--orange:#FF7A18;--gold:#FFD23F;--blue:#22D3EE;--green:#2BFF88;--rug:#FF3653;
+    --bg:#08080c;--text:#f2f4f8;--muted:#9aa3b2;
+    --display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--display);color:var(--text);background:
+    radial-gradient(circle at 15% 8%,rgba(255,59,48,.16),transparent 45%),
+    radial-gradient(circle at 85% 0%,rgba(34,211,238,.12),transparent 45%),var(--bg);
+    min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .app{width:100%;max-width:720px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+  .logo{font-weight:700;font-size:26px;letter-spacing:-.5px;background:linear-gradient(90deg,var(--red),var(--orange) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .bal{font-family:var(--mono);font-size:14px;color:var(--gold)}.bal b{color:#fff}
+  .status{font-family:var(--mono);font-size:12px;color:var(--muted);min-height:16px;margin-bottom:8px;letter-spacing:.5px}
+
+  /* the tunnel / road scene */
+  .scene{position:relative;border-radius:18px;overflow:hidden;height:340px;
+    background:linear-gradient(180deg,#0a0a12 0%,#12101c 55%,#1a1220 100%);
+    border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 0 70px rgba(0,0,0,.6),0 16px 50px rgba(0,0,0,.5)}
+  /* perspective road */
+  .road{position:absolute;left:50%;bottom:0;width:60%;height:76%;transform:translateX(-50%);
+    background:
+      repeating-linear-gradient(0deg,rgba(255,210,63,.0) 0 26px,rgba(255,210,63,.55) 26px 46px) center/8px 100% no-repeat,
+      linear-gradient(180deg,#15151b,#26262f);
+    clip-path:polygon(38% 0,62% 0,100% 100%,0 100%);opacity:.9}
+  .road.run{animation:dash .5s linear infinite}
+  @keyframes dash{from{background-position-y:0}to{background-position-y:46px}}
+  .arch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:44%;height:40%;border:3px solid rgba(255,122,24,.35);border-bottom:none;border-radius:120px 120px 0 0;box-shadow:0 0 30px rgba(255,122,24,.25) inset}
+  .car{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:46px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6));transition:.2s;z-index:3}
+  .seal{position:absolute;inset:0;background:linear-gradient(0deg,rgba(255,54,83,.0),rgba(255,54,83,.0));opacity:0;transition:.25s;z-index:2}
+  .seal.on{opacity:1;background:radial-gradient(circle at 50% 60%,rgba(255,54,83,.35),transparent 60%)}
+  .mult{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:4}
+  .mult .big{font-weight:700;font-size:78px;line-height:1;text-shadow:0 0 26px currentColor;color:var(--gold);transition:color .15s}
+  .mult .big.run{color:var(--green)}.mult .big.bust{color:var(--rug)}
+  .mult .lbl{font-family:var(--mono);font-size:13px;color:#fff;margin-top:6px;opacity:.9}
+  .pool{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:11px;color:var(--gold);z-index:5}
+  .fair{position:absolute;bottom:8px;left:12px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.55);max-width:92%;z-index:5}.fair b{color:var(--orange)}.fair .ok{color:var(--green)}
+  .feed{position:absolute;top:10px;right:12px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;z-index:5;line-height:1.5}
+
+  .controls{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px;margin-top:12px}
+  @media(max-width:600px){.controls{grid-template-columns:1fr 1fr}.act{grid-column:1/-1}}
+  .field{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 14px}
+  .field label{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+  .field .row{display:flex;align-items:center;gap:8px}
+  .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none}
+  .mini{font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(255,255,255,.07);border-radius:7px;padding:5px 8px;cursor:pointer}
+  .mini:hover{color:#fff}
+  .act{display:flex;flex-direction:column;gap:8px;justify-content:center}
+  button.big{min-height:52px;border:none;border-radius:14px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:19px;color:#2a0a06;transition:.1s}
+  button.big:active{transform:scale(.98)}
+  button.big:disabled{opacity:.4;cursor:not-allowed}
+  .btn-bet{background:linear-gradient(135deg,var(--red),var(--orange))}
+  .btn-cash{background:linear-gradient(135deg,var(--gold),var(--green));color:#062112}
+  footer{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">🏎️ Overdrive</div>
+    <div class="bal"><b id="bal">—</b> credits</div>
+  </header>
+  <div class="status" id="status">connecting to the game server…</div>
+
+  <div class="scene" id="scene">
+    <div class="road" id="road"></div>
+    <div class="arch"></div>
+    <div class="seal" id="seal"></div>
+    <div class="car" id="car">🏎️</div>
+    <div class="pool" id="pool"></div>
+    <div class="feed" id="feed"></div>
+    <div class="mult"><div class="big" id="big">1.00×</div><div class="lbl" id="lbl">waiting for the next run…</div></div>
+    <div class="fair" id="fair"></div>
+  </div>
+
+  <div class="controls">
+    <div class="field"><label>bet (credits)</label><div class="row"><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"><span class="mini" id="half">½</span><span class="mini" id="dbl">2×</span></div></div>
+    <div class="field"><label>auto cash-out ×</label><div class="row"><input id="auto" type="number" value="2.00" min="1.01" step="0.1" inputmode="decimal"></div></div>
+    <div class="act">
+      <button class="big btn-bet" id="btnBet" disabled>Floor it 🏎️</button>
+      <button class="big btn-cash" id="btnCash" disabled>Cash out</button>
+    </div>
+  </div>
+
+  <footer>Play-money demo · provably fair · the crash point is committed before the round (a published hash) and revealed after — cash out before the tunnel seals.</footer>
+</div>
+
+<script type="module">
+const $ = (id)=>document.getElementById(id);
+// Same-origin crash socket on the unified server. Overdrive rides the "pulse" turbo crash config.
+const RGS = new URLSearchParams(location.search).get("rgs") || `${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws`;
+const GAME = new URLSearchParams(location.search).get("game") || "pulse";
+const MINOR = 100;
+const fmt = (m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const randHex = (n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
+
+let ws, phase="connecting";           // connecting | betting | running | between
+let myBet=null;                        // {betId, stake, cashed:false} for the CURRENT round
+let placing=false, mult=1;
+
+function setStatus(t){ $("status").textContent=t; }
+function buttons(){
+  // can bet only during the betting window and only if not already in
+  $("btnBet").disabled = !(phase==="betting" && !myBet && !placing);
+  // can cash only while running with a live, un-cashed bet
+  $("btnCash").disabled = !(phase==="running" && myBet && !myBet.cashed);
+  $("bet").disabled = !(phase==="betting" && !myBet);
+  $("auto").disabled = !(phase==="betting" && !myBet);
+}
+function curStake(){ return Math.round(parseFloat($("bet").value||"0")*MINOR); }
+function autoVal(){ const v=parseFloat($("auto").value||"0"); return v>=1.01? v : undefined; }
+
+function connect(){
+  ws=new WebSocket(RGS);
+  ws.onopen=()=>ws.send(JSON.stringify({type:"hello",sessionToken:"overdrive-"+randHex(3),mode:"demo",gameId:GAME}));
+  ws.onclose=()=>{ setStatus("disconnected · reconnecting…"); phase="connecting"; buttons(); setTimeout(()=>{ if(phase==="connecting") connect(); },1500); };
+  ws.onerror=()=> setStatus("can't reach the game server on "+RGS);
+  ws.onmessage=(ev)=>handle(JSON.parse(ev.data));
+}
+
+function handle(m){
+  switch(m.type){
+    case "welcome":
+      $("bal").textContent=fmt(m.balance); $("pool").textContent="🏆 pool "+fmt(m.moonPool);
+      phase="between"; setStatus("connected · waiting for the next run"); buttons();
+      break;
+    case "round_open":
+      // new betting window
+      myBet=null; placing=false; mult=1; phase="betting";
+      $("pool").textContent="🏆 pool "+fmt(m.moonPool);
+      $("road").classList.remove("run"); $("seal").classList.remove("on");
+      $("big").className="big"; $("big").textContent="1.00×"; $("car").textContent="🏎️";
+      $("lbl").textContent="grid open — floor it to join this run";
+      $("fair").innerHTML=`fair commit <b>${m.round.commitment.slice(0,20)}…</b> · round #${m.round.roundNumber}`;
+      setStatus("grid open · place your bet"); buttons();
+      break;
+    case "bet_accepted":
+      myBet={betId:m.betId, stake:m.stake, cashed:false}; placing=false;
+      $("bal").textContent=fmt(m.balance);
+      $("lbl").textContent="you're in — hold for launch"; setStatus("bet placed · waiting for launch"); buttons();
+      break;
+    case "betting_closed":
+      phase="running"; $("road").classList.add("run"); $("big").className="big run";
+      $("lbl").textContent = myBet? "GO — cash out before it seals" : "watching this run";
+      setStatus("launched · "+(myBet?"cash out any time":"bet on the next run")); buttons();
+      break;
+    case "tick":
+      mult=m.multiplier; $("big").textContent=mult.toFixed(2)+"×";
+      // car eases up the tunnel as the multiplier climbs
+      $("car").style.bottom = Math.min(150, 26 + Math.log2(mult)*26) + "px";
+      if(myBet && !myBet.cashed) $("lbl").textContent = "cash value "+fmt(Math.floor(myBet.stake*mult));
+      break;
+    case "cash_out":
+      if(myBet && m.betId===myBet.betId){ myBet.cashed=true; }
+      $("bal").textContent=fmt(m.balance);
+      $("big").className="big"; $("big").style.color="var(--green)";
+      $("lbl").textContent=`escaped 🏁 at ${m.multiplier.toFixed(2)}× · +${fmt(m.payout)}`;
+      setStatus(`cashed out ${m.multiplier.toFixed(2)}× for ${fmt(m.payout)} credits`); buttons();
+      break;
+    case "jackpot":
+      $("bal").textContent=fmt(m.balance);
+      $("feed").innerHTML=`🏆 JACKPOT +${fmt(m.award)}!`;
+      break;
+    case "crash":{
+      phase="between"; const r=m.round;
+      $("road").classList.remove("run"); $("seal").classList.add("on");
+      $("big").className="big bust"; $("big").textContent=r.crashPoint.toFixed(2)+"×";
+      $("pool").textContent="🏆 pool "+fmt(m.moonPool);
+      if(myBet && !myBet.cashed){ $("car").textContent="💥"; $("lbl").textContent=`sealed at ${r.crashPoint.toFixed(2)}× — you were caught`; }
+      else if(!myBet){ $("lbl").textContent=`sealed at ${r.crashPoint.toFixed(2)}×`; }
+      $("fair").innerHTML=`revealed seed <b>${r.serverSeed.slice(0,18)}…</b> · crash <b>${r.crashPoint.toFixed(2)}×</b> · SHA-256(seed)=commit <span class="ok">✓ verifiable</span>`;
+      setStatus(`sealed at ${r.crashPoint.toFixed(2)}× · next run shortly`);
+      myBet=null; buttons();
+      break;
+    }
+    case "balance": $("bal").textContent=fmt(m.balance); break;
+    case "error": setStatus("⚠ "+m.message); placing=false; buttons(); break;
+  }
+}
+
+$("btnBet").onclick=()=>{
+  const stake=curStake(); if(!(stake>0)) return setStatus("enter a bet");
+  placing=true; buttons();
+  ws.send(JSON.stringify({type:"place_bet",stake,autoCashOut:autoVal(),clientEntropy:randHex(16)}));
+  setStatus("placing bet…");
+};
+$("btnCash").onclick=()=>{ if(myBet && !myBet.cashed) ws.send(JSON.stringify({type:"cash_out",betId:myBet.betId})); };
+$("half").onclick=()=>$("bet").value=Math.max(1,Math.floor(parseFloat($("bet").value||"1")/2));
+$("dbl").onclick=()=>$("bet").value=Math.floor(parseFloat($("bet").value||"1")*2);
+
+connect();
+</script>
+</body>
+</html>

@@ -17,8 +17,7 @@
   h1{ font-size:clamp(34px,6vw,58px); line-height:1.04; margin:.3em 0 .2em; font-weight:800;
     background:linear-gradient(120deg,#22d3ee,#a855f7,#f472b6); -webkit-background-clip:text; background-clip:text; color:transparent }
   .sub{ color:var(--mut); max-width:62ch; font-size:18px }
-  .cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin:40px 0 26px }
-  @media(max-width:860px){ .cards{grid-template-columns:1fr 1fr} }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px; margin:40px 0 26px }
   @media(max-width:560px){ .cards{grid-template-columns:1fr} }
   .card{ background:linear-gradient(180deg,var(--panel),#0d0f17); border:1px solid var(--line);
     border-radius:18px; padding:26px; text-decoration:none; color:inherit; display:block;
@@ -30,6 +29,7 @@
     background:rgba(34,211,238,.12); color:#7fe6f6; border:1px solid rgba(34,211,238,.25) }
   .tag.p{ background:rgba(168,85,247,.12); color:#c9a3f5; border-color:rgba(168,85,247,.28) }
   .tag.r{ background:rgba(255,90,40,.12); color:#ff9f80; border-color:rgba(255,90,40,.30) }
+  .tag.g{ background:rgba(255,210,63,.12); color:#ffe08a; border-color:rgba(255,210,63,.30) }
   .play{ display:inline-flex; align-items:center; gap:8px; font-weight:700; color:#fff;
     background:var(--grad); padding:10px 16px; border-radius:10px; margin-top:6px }
   .meta{ display:flex; gap:18px; flex-wrap:wrap; color:var(--mut); font-size:14px; margin-top:18px }
@@ -43,7 +43,7 @@
 <body>
 <div class="wrap">
   <div class="eyebrow">Clutch Studios · Remote Gaming Server</div>
-  <h1>Three games. One integration.</h1>
+  <h1>Four games. One integration.</h1>
   <p class="sub">A live, server-authoritative, provably-fair demo. Every title runs on the same RGS — the same wallet, the same seed-chain fairness, the same socket. Play them below.</p>
 
   <div class="cards">
@@ -63,10 +63,17 @@
     </a>
     <a class="card" href="/redline/">
       <div class="emoji">🏎️</div>
-      <span class="tag r">Step-multiplier · single player</span>
+      <span class="tag r">Step-multiplier · racing</span>
       <h3>Redline</h3>
-      <p>Floor it across the tracks. Each crossing pays more — but one hides a train. A racing skin on the same crossing engine.</p>
+      <p>Floor it across the tracks. Each crossing pays more — but one hides a train. A racing skin on the crossing engine.</p>
       <span class="play">Play Redline →</span>
+    </a>
+    <a class="card" href="/overdrive/">
+      <div class="emoji">🏁</div>
+      <span class="tag g">Crash · turbo rounds</span>
+      <h3>Overdrive</h3>
+      <p>Floor it down the tunnel as the multiplier climbs — cash out before the wall seals. Turbo car-crash on the crash engine.</p>
+      <span class="play">Play Overdrive →</span>
     </a>
   </div>
 
