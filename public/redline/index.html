@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Redline — provably-fair crossing demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --red:#FF3B30;--orange:#FF7A18;--gold:#FFD23F;--blue:#22D3EE;--green:#2BFF88;--purple:#8B3FFF;--rug:#FF3653;
+    --bg:#0a0a0d;--text:#f2f4f8;--muted:#9aa3b2;
+    --display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:var(--display);color:var(--text);background:
+    radial-gradient(circle at 15% 10%,rgba(255,59,48,.16),transparent 45%),
+    radial-gradient(circle at 85% 0%,rgba(34,211,238,.14),transparent 45%),
+    var(--bg);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .app{width:100%;max-width:880px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+  .logo{font-weight:700;font-size:26px;letter-spacing:-.5px;background:linear-gradient(90deg,var(--red),var(--orange) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .bal{font-family:var(--mono);font-size:14px;color:var(--gold)}.bal b{color:#fff}
+  .status{font-family:var(--mono);font-size:12px;color:var(--muted);min-height:16px;margin-bottom:8px;letter-spacing:.5px}
+
+  .diffs{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .diff{flex:1;min-width:120px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 12px;cursor:pointer;transition:.15s;text-align:left}
+  .diff:hover{background:rgba(255,255,255,.09)}
+  .diff.sel{border-color:var(--red);background:rgba(255,59,48,.12);box-shadow:0 0 16px rgba(255,59,48,.20)}
+  .diff .n{font-weight:700;font-size:14px}
+  .diff .m{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+
+  /* the highway / crossings strip */
+  .river{position:relative;border-radius:18px;overflow:hidden;height:300px;background:
+    repeating-linear-gradient(90deg,transparent 0 78px,rgba(255,255,255,.03) 78px 80px),
+    linear-gradient(180deg,#17171c,#0b0b0f);
+    box-shadow:inset 0 0 60px rgba(0,0,0,.6),0 16px 50px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08)}
+  /* centre dashed lane line for the "road" the car drives on */
+  .river::before{content:"";position:absolute;top:calc(104px + 24px);left:0;right:0;height:4px;
+    background:repeating-linear-gradient(90deg,var(--gold) 0 22px,transparent 22px 46px);opacity:.5;z-index:1}
+  .track{position:absolute;top:0;left:0;height:100%;display:flex;align-items:center;padding:0 30px;transition:transform .45s cubic-bezier(.22,1,.36,1)}
+  .pad{flex:0 0 110px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+  /* each crossing = a railway-track tile */
+  .pad .stone{width:82px;height:82px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:32px;
+    background:repeating-linear-gradient(0deg,#2a2118 0 8px,#161311 8px 16px);border:2px solid rgba(255,122,24,.35);box-shadow:0 6px 16px rgba(0,0,0,.5),inset 0 0 14px rgba(0,0,0,.4);transition:.2s}
+  .pad.bank .stone{background:radial-gradient(circle at 35% 30%,#243a4f,#0c1622);border-color:rgba(34,211,238,.45);border-radius:50%}
+  .pad.passed .stone{border-color:var(--green);box-shadow:0 0 18px rgba(43,255,136,.4)}
+  .pad.current .stone{transform:scale(1.1);border-color:var(--red);box-shadow:0 0 26px rgba(255,59,48,.6)}
+  .pad.hazard .stone{background:radial-gradient(circle at 35% 30%,#5b1020,#2a0810);border-color:var(--rug);box-shadow:0 0 26px rgba(255,54,83,.6)}
+  .pad .mult{font-family:var(--mono);font-size:13px;font-weight:700;margin-top:8px;color:var(--muted)}
+  .pad.passed .mult{color:var(--green)}.pad.current .mult{color:var(--red)}
+  .frog{position:absolute;top:104px;font-size:36px;transition:.45s cubic-bezier(.22,1,.36,1);filter:drop-shadow(0 6px 8px rgba(0,0,0,.6));z-index:3}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+  .bigmult{font-weight:700;font-size:60px;line-height:1;text-shadow:0 0 22px currentColor;color:var(--red);opacity:0;transition:.2s}
+  .bigmult.show{opacity:1}
+  .toast{font-family:var(--mono);font-size:14px;margin-top:6px;color:#fff;opacity:0;transition:.2s}.toast.show{opacity:1}
+  .fair{position:absolute;bottom:8px;left:12px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.55);max-width:88%}.fair b{color:var(--orange)}.fair .ok{color:var(--green)}
+
+  .controls{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px;margin-top:12px}
+  @media(max-width:600px){.controls{grid-template-columns:1fr 1fr}.act{grid-column:1/-1}}
+  .field{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 14px}
+  .field label{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+  .field .row{display:flex;align-items:center;gap:8px}
+  .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none}
+  .mini{font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(255,255,255,.07);border-radius:7px;padding:5px 8px;cursor:pointer}
+  .mini:hover{color:#fff}
+  .act{display:flex;flex-direction:column;gap:8px}
+  button.big{flex:1;min-height:34px;border:none;border-radius:14px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:17px;color:#2a0a06;transition:.1s}
+  button.big:active{transform:scale(.98)}
+  button.big:disabled{opacity:.4;cursor:not-allowed}
+  .btn-bet{background:linear-gradient(135deg,var(--red),var(--orange))}
+  .btn-hop{background:linear-gradient(135deg,var(--orange),var(--gold))}
+  .btn-cash{background:linear-gradient(135deg,var(--gold),var(--green));color:#062112}
+  footer{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+  .splash{position:absolute;font-size:40px;opacity:0;transition:.3s;z-index:4}
+  .splash.show{opacity:1;animation:pop .5s}
+  @keyframes pop{0%{transform:scale(.4)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">🏎️ Redline</div>
+    <div class="bal"><b id="bal">—</b> credits</div>
+  </header>
+  <div class="status" id="status">connecting to the game server…</div>
+
+  <div class="diffs" id="diffs"></div>
+
+  <div class="river" id="river">
+    <div class="track" id="track"></div>
+    <div class="frog" id="frog" style="display:none">🏎️</div>
+    <div class="splash" id="splash"></div>
+    <div class="overlay">
+      <div class="bigmult" id="bigmult">1.00×</div>
+      <div class="toast" id="toast"></div>
+    </div>
+    <div class="fair" id="fair"></div>
+  </div>
+
+  <div class="controls">
+    <div class="field"><label>bet (credits)</label><div class="row"><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"><span class="mini" id="half">½</span><span class="mini" id="dbl">2×</span></div></div>
+    <div class="field"><label>cash out value</label><div class="row"><input id="cashval" value="—" readonly></div></div>
+    <div class="act">
+      <button class="big btn-bet" id="btnBet" disabled>Floor it 🏎️</button>
+      <div style="display:flex;gap:8px">
+        <button class="big btn-hop" id="btnHop" disabled style="flex:1">Cross ▶</button>
+        <button class="big btn-cash" id="btnCash" disabled style="flex:1">Cash out</button>
+      </div>
+    </div>
+  </div>
+
+  <footer id="foot">Play-money demo · provably fair · the train's crossing is hidden server-side and revealed only when the run ends.</footer>
+</div>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+// Hosted build: same-origin path-routed WS (the unified server handles /ws/cross — same crossing engine).
+const RGS = new URLSearchParams(location.search).get("rgs") || `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws/cross`;
+const MINOR = 100; // minor units per credit
+const fmt = (m) => (m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const randHex = (n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
+
+let ws, state="connecting", diffs={}, sel="easy", run=null;
+
+function setStatus(t){ $("status").textContent=t; }
+function buttons(){
+  const idle = state==="idle";
+  const running = state==="running";
+  $("btnBet").disabled = !idle;
+  $("btnHop").disabled = !running;
+  $("btnCash").disabled = !(running && run && run.lane>=1);
+  $("bet").disabled = !idle;
+  [...document.querySelectorAll(".diff")].forEach(d=>d.style.pointerEvents = idle?"auto":"none");
+}
+
+function renderDiffs(){
+  const order=["easy","medium","hard","hardcore"];
+  $("diffs").innerHTML = order.filter(k=>diffs[k]).map(k=>{
+    const c=diffs[k]; const edge=0.03;
+    const step1=Math.floor((1-edge)/c.survival*100)/100;
+    const max=Math.floor((1-edge)/Math.pow(c.survival,c.lanes)*100)/100;
+    const maxLbl = max>=1000? Math.round(max).toLocaleString()+"×" : max.toFixed(2)+"×";
+    return `<div class="diff ${k===sel?'sel':''}" data-k="${k}"><div class="n">${k[0].toUpperCase()+k.slice(1)}</div><div class="m">${c.lanes} crossings · ${step1}× → ${maxLbl}</div></div>`;
+  }).join("");
+  [...document.querySelectorAll(".diff")].forEach(d=>d.onclick=()=>{ if(state!=="idle")return; sel=d.dataset.k; renderDiffs(); });
+}
+
+function buildTrack(){
+  const lanes=run.lanes, lad=run.ladder;
+  let html = `<div class="pad bank"><div class="stone">🏁</div><div class="mult">start</div></div>`;
+  for(let i=1;i<=lanes;i++){
+    html += `<div class="pad" data-lane="${i}" id="pad${i}"><div class="stone">🛤️</div><div class="mult">${lad[i-1].toFixed(2)}×</div></div>`;
+  }
+  html += `<div class="pad bank"><div class="stone">🏆</div><div class="mult">the finish</div></div>`;
+  $("track").innerHTML = html;
+  $("frog").style.display="block";
+  positionFrog(0);
+}
+function positionFrog(lane){
+  const padW=110, pad=30;
+  const x = pad + lane*padW + (padW-30)/2;
+  $("frog").style.left = x+"px";
+  const riverW = $("river").clientWidth;
+  const shift = Math.max(0, (pad + lane*padW + padW/2) - riverW/2);
+  $("track").style.transform = `translateX(${-shift}px)`;
+  $("frog").style.transform = `translateX(${-shift}px)`;
+}
+function markPad(lane,cls){ const p=$("pad"+lane); if(p){ p.classList.remove("current","passed","hazard"); p.classList.add(cls);} }
+
+function connect(){
+  ws = new WebSocket(RGS);
+  ws.onopen = ()=> ws.send(JSON.stringify({type:"hello",sessionToken:"redline-player-"+randHex(3),mode:"demo"}));
+  ws.onclose = ()=>{ setStatus("disconnected · reconnecting…"); state="connecting"; buttons(); setTimeout(()=>{ if(state==="connecting") connect(); }, 1500); };
+  ws.onerror = ()=> setStatus("can't reach the game server on "+RGS);
+  ws.onmessage = (ev)=> handle(JSON.parse(ev.data));
+}
+function handle(m){
+  switch(m.type){
+    case "welcome":
+      diffs=m.difficulties; $("bal").textContent=fmt(m.balance);
+      state="idle"; renderDiffs(); buttons();
+      setStatus("ready · pick a class, set your bet, and floor it");
+      break;
+    case "run_open":
+      run={...m.run, lane:0}; $("bal").textContent=fmt(m.balance);
+      state="running"; buildTrack(); buttons();
+      $("bigmult").classList.remove("show"); $("toast").classList.remove("show"); $("splash").classList.remove("show");
+      $("cashval").value="—";
+      $("fair").innerHTML = `fair commit <b>${run.commitment.slice(0,18)}…</b> · client seed <b>${run.clientSeed.slice(0,12)}…</b>`;
+      setStatus(`racing · ${run.difficulty} · cross or cash out`);
+      break;
+    case "hop":{
+      run.lane=m.lane;
+      markPad(m.lane,"current");
+      for(let i=1;i<m.lane;i++) markPad(i,"passed");
+      positionFrog(m.lane);
+      $("bigmult").textContent=m.multiplier.toFixed(2)+"×"; $("bigmult").classList.add("show");
+      $("cashval").value = fmt(Math.floor(curStake()*m.multiplier));
+      buttons();
+      break;
+    }
+    case "run_over":{
+      const r=m.reveal;
+      if(m.status==="rugged"){
+        markPad(m.lane,"hazard");
+        const p=$("pad"+m.lane); if(p) p.querySelector(".stone").textContent="🚂";
+        positionFrog(m.lane);
+        $("frog").textContent="🔥";
+        $("bigmult").textContent="WRECKED"; $("bigmult").style.color="var(--rug)"; $("bigmult").classList.add("show");
+        showSplash("💥"); $("toast").textContent=`a train hit at crossing ${m.lane}`; $("toast").classList.add("show");
+        setStatus(`wrecked at crossing ${m.lane} · the train's lane was ${r.failLane}`);
+      } else {
+        $("frog").textContent="🏎️"; $("bigmult").style.color="var(--green)";
+        $("bigmult").textContent="+"+fmt(m.payout); $("bigmult").classList.add("show");
+        showSplash("🏁"); $("toast").textContent=`cashed ${m.multiplier.toFixed(2)}× at crossing ${m.lane}`; $("toast").classList.add("show");
+        setStatus(`cashed out for ${fmt(m.payout)} credits`);
+      }
+      $("bal").textContent=fmt(m.balance);
+      $("fair").innerHTML = `revealed seed <b>${r.serverSeed.slice(0,18)}…</b> · train lane <b>${r.failLane}</b> · SHA-256(seed)=commit <span class="ok">✓ verifiable</span>`;
+      $("frog").textContent="🏎️"; // reset for next
+      state="idle"; run=null; buttons();
+      break;
+    }
+    case "error":
+      setStatus("⚠ "+m.message); state= state==="running"?"running":"idle"; buttons();
+      break;
+  }
+}
+function curStake(){ return Math.round(parseFloat($("bet").value||"0")*MINOR); }
+function showSplash(e){ const s=$("splash"); s.textContent=e; s.classList.remove("show"); void s.offsetWidth; s.classList.add("show"); }
+
+$("btnBet").onclick=()=>{
+  const stake=curStake();
+  if(!(stake>0)) return setStatus("enter a bet");
+  ws.send(JSON.stringify({type:"open_run",stake,difficulty:sel,clientEntropy:randHex(16)}));
+  state="betting"; buttons();
+};
+$("btnHop").onclick=()=>{ if(run) ws.send(JSON.stringify({type:"hop",runId:run.runId})); };
+$("btnCash").onclick=()=>{ if(run) ws.send(JSON.stringify({type:"cash_out",runId:run.runId})); };
+$("half").onclick=()=>$("bet").value=Math.max(1,Math.floor(parseFloat($("bet").value||"1")/2));
+$("dbl").onclick=()=>$("bet").value=Math.floor(parseFloat($("bet").value||"1")*2);
+
+connect();
+</script>
+</body>
+</html>
