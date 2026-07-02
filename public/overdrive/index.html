@@ -3,202 +3,244 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Overdrive — provably-fair car crash demo</title>
+<title>Overdrive — provably-fair car-crash demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <style>
-  :root{
-    --red:#FF3B30;--orange:#FF7A18;--gold:#FFD23F;--blue:#22D3EE;--green:#2BFF88;--rug:#FF3653;
-    --bg:#08080c;--text:#f2f4f8;--muted:#9aa3b2;
-    --display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace;
-  }
+  :root{ --red:#FF3B30;--orange:#FF7A18;--gold:#FFD23F;--teal:#22D3EE;--green:#2BFF88;--rug:#FF3653;
+    --text:#f2f4f8;--muted:#9aa3b2;--display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace; }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{font-family:var(--display);color:var(--text);background:
-    radial-gradient(circle at 15% 8%,rgba(255,59,48,.16),transparent 45%),
-    radial-gradient(circle at 85% 0%,rgba(34,211,238,.12),transparent 45%),var(--bg);
-    min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-  .app{width:100%;max-width:720px}
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;flex-wrap:wrap}
-  .logo{font-weight:700;font-size:26px;letter-spacing:-.5px;background:linear-gradient(90deg,var(--red),var(--orange) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .bal{font-family:var(--mono);font-size:14px;color:var(--gold)}.bal b{color:#fff}
-  .status{font-family:var(--mono);font-size:12px;color:var(--muted);min-height:16px;margin-bottom:8px;letter-spacing:.5px}
-
-  /* the tunnel / road scene */
-  .scene{position:relative;border-radius:18px;overflow:hidden;height:340px;
-    background:linear-gradient(180deg,#0a0a12 0%,#12101c 55%,#1a1220 100%);
-    border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 0 70px rgba(0,0,0,.6),0 16px 50px rgba(0,0,0,.5)}
-  /* perspective road */
-  .road{position:absolute;left:50%;bottom:0;width:60%;height:76%;transform:translateX(-50%);
-    background:
-      repeating-linear-gradient(0deg,rgba(255,210,63,.0) 0 26px,rgba(255,210,63,.55) 26px 46px) center/8px 100% no-repeat,
-      linear-gradient(180deg,#15151b,#26262f);
-    clip-path:polygon(38% 0,62% 0,100% 100%,0 100%);opacity:.9}
-  .road.run{animation:dash .5s linear infinite}
-  @keyframes dash{from{background-position-y:0}to{background-position-y:46px}}
-  .arch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:44%;height:40%;border:3px solid rgba(255,122,24,.35);border-bottom:none;border-radius:120px 120px 0 0;box-shadow:0 0 30px rgba(255,122,24,.25) inset}
-  .car{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:46px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6));transition:.2s;z-index:3}
-  .seal{position:absolute;inset:0;background:linear-gradient(0deg,rgba(255,54,83,.0),rgba(255,54,83,.0));opacity:0;transition:.25s;z-index:2}
-  .seal.on{opacity:1;background:radial-gradient(circle at 50% 60%,rgba(255,54,83,.35),transparent 60%)}
-  .mult{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:4}
-  .mult .big{font-weight:700;font-size:78px;line-height:1;text-shadow:0 0 26px currentColor;color:var(--gold);transition:color .15s}
-  .mult .big.run{color:var(--green)}.mult .big.bust{color:var(--rug)}
-  .mult .lbl{font-family:var(--mono);font-size:13px;color:#fff;margin-top:6px;opacity:.9}
-  .pool{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:11px;color:var(--gold);z-index:5}
-  .fair{position:absolute;bottom:8px;left:12px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.55);max-width:92%;z-index:5}.fair b{color:var(--orange)}.fair .ok{color:var(--green)}
-  .feed{position:absolute;top:10px;right:12px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;z-index:5;line-height:1.5}
-
-  .controls{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px;margin-top:12px}
-  @media(max-width:600px){.controls{grid-template-columns:1fr 1fr}.act{grid-column:1/-1}}
-  .field{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 14px}
-  .field label{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
-  .field .row{display:flex;align-items:center;gap:8px}
-  .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none}
-  .mini{font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(255,255,255,.07);border-radius:7px;padding:5px 8px;cursor:pointer}
+  html,body{height:100%;overflow:hidden;background:#05060a}
+  body{font-family:var(--display);color:var(--text);-webkit-font-smoothing:antialiased}
+  #wrap{position:fixed;inset:0}
+  canvas{display:block;width:100%;height:100%}
+  /* HUD overlay */
+  .hud{position:absolute;inset:0;pointer-events:none;z-index:5}
+  .top{position:absolute;top:16px;left:0;right:0;display:flex;justify-content:space-between;padding:0 20px}
+  .logo{font-weight:700;font-size:24px;letter-spacing:-.5px;background:linear-gradient(90deg,var(--red),var(--orange) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 2px 20px rgba(0,0,0,.6)}
+  .bal{font-family:var(--mono);font-size:15px;color:var(--gold);text-shadow:0 2px 8px #000}.bal b{color:#fff}
+  .status{position:absolute;top:52px;left:20px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.5px;text-shadow:0 1px 4px #000}
+  /* big multiplier */
+  .mult{position:absolute;top:20%;left:0;right:0;text-align:center}
+  .mult .big{font-weight:700;font-size:14vw;line-height:1;color:var(--gold);text-shadow:0 0 30px currentColor,0 4px 12px #000;transition:color .15s}
+  .mult .big.run{color:#fff}.mult .big.bust{color:var(--rug)}
+  .mult .lbl{font-family:var(--mono);font-size:14px;color:#fff;text-shadow:0 2px 6px #000;margin-top:2px}
+  /* speedometer */
+  .speedo{position:absolute;right:26px;bottom:120px;text-align:center;font-family:var(--mono)}
+  .speedo .n{font-size:40px;font-weight:700;color:#fff;text-shadow:0 0 18px rgba(34,211,238,.7),0 2px 8px #000}
+  .speedo .u{font-size:11px;color:var(--teal);letter-spacing:2px}
+  .place{position:absolute;left:20px;bottom:120px;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.7);text-shadow:0 1px 4px #000;line-height:1.6}
+  .place b{color:var(--teal)}.place .ok{color:var(--green)}
+  /* controls */
+  .ctl{position:absolute;left:0;right:0;bottom:18px;display:flex;gap:10px;justify-content:center;align-items:flex-end;pointer-events:none;padding:0 14px}
+  .card{pointer-events:auto;background:rgba(12,14,22,.72);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:8px 12px}
+  .card label{display:block;font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+  .card .row{display:flex;align-items:center;gap:6px}
+  .card input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:18px;width:70px;outline:none}
+  .mini{font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(255,255,255,.09);border-radius:6px;padding:4px 7px;cursor:pointer}
   .mini:hover{color:#fff}
-  .act{display:flex;flex-direction:column;gap:8px;justify-content:center}
-  button.big{min-height:52px;border:none;border-radius:14px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:19px;color:#2a0a06;transition:.1s}
-  button.big:active{transform:scale(.98)}
-  button.big:disabled{opacity:.4;cursor:not-allowed}
+  button.big{pointer-events:auto;min-height:56px;min-width:150px;border:none;border-radius:14px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:19px;color:#2a0a06;transition:.1s}
+  button.big:active{transform:scale(.98)} button.big:disabled{opacity:.4;cursor:not-allowed}
   .btn-bet{background:linear-gradient(135deg,var(--red),var(--orange))}
   .btn-cash{background:linear-gradient(135deg,var(--gold),var(--green));color:#062112}
-  footer{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+  .fade{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .12s;pointer-events:none;z-index:4}
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="logo">🏎️ Overdrive</div>
-    <div class="bal"><b id="bal">—</b> credits</div>
-  </header>
-  <div class="status" id="status">connecting to the game server…</div>
-
-  <div class="scene" id="scene">
-    <div class="road" id="road"></div>
-    <div class="arch"></div>
-    <div class="seal" id="seal"></div>
-    <div class="car" id="car">🏎️</div>
-    <div class="pool" id="pool"></div>
-    <div class="feed" id="feed"></div>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div class="fade" id="flash"></div>
+  <div class="hud">
+    <div class="top"><div class="logo">🏎️ OVERDRIVE</div><div class="bal"><b id="bal">—</b> credits</div></div>
+    <div class="status" id="status">connecting to the game server…</div>
     <div class="mult"><div class="big" id="big">1.00×</div><div class="lbl" id="lbl">waiting for the next run…</div></div>
-    <div class="fair" id="fair"></div>
+    <div class="speedo"><div class="n" id="spd">0</div><div class="u">KM/H</div></div>
+    <div class="place" id="fair">DOWNTOWN · provably fair</div>
   </div>
-
-  <div class="controls">
-    <div class="field"><label>bet (credits)</label><div class="row"><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"><span class="mini" id="half">½</span><span class="mini" id="dbl">2×</span></div></div>
-    <div class="field"><label>auto cash-out ×</label><div class="row"><input id="auto" type="number" value="2.00" min="1.01" step="0.1" inputmode="decimal"></div></div>
-    <div class="act">
-      <button class="big btn-bet" id="btnBet" disabled>Floor it 🏎️</button>
-      <button class="big btn-cash" id="btnCash" disabled>Cash out</button>
-    </div>
+  <div class="ctl">
+    <div class="card"><label>bet</label><div class="row"><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"><span class="mini" id="half">½</span><span class="mini" id="dbl">2×</span></div></div>
+    <button class="big btn-bet" id="btnBet" disabled>Floor it 🏎️</button>
+    <button class="big btn-cash" id="btnCash" disabled>Cash out</button>
+    <div class="card"><label>auto ×</label><div class="row"><input id="auto" type="number" value="2.00" min="1.01" step="0.1" inputmode="decimal"></div></div>
   </div>
-
-  <footer>Play-money demo · provably fair · the crash point is committed before the round (a published hash) and revealed after — cash out before the tunnel seals.</footer>
 </div>
 
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
 <script type="module">
-const $ = (id)=>document.getElementById(id);
-// Same-origin crash socket on the unified server. Overdrive rides the "pulse" turbo crash config.
+import * as THREE from "three";
+const $=(id)=>document.getElementById(id);
+
+/* ---------------- 3D scene: behind-the-car neon night chase ---------------- */
+const canvas=$("c");
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x05060f);
+scene.fog=new THREE.Fog(0x0a0a1e, 40, 150);
+
+const camera=new THREE.PerspectiveCamera(72, innerWidth/innerHeight, 0.1, 400);
+camera.position.set(0, 3.1, 8.5);
+camera.lookAt(0, 1.4, -20);
+
+scene.add(new THREE.AmbientLight(0x4a5a80, 0.7));
+const key=new THREE.DirectionalLight(0x8fbaff, 0.6); key.position.set(-5,10,6); scene.add(key);
+const rimR=new THREE.PointLight(0xff3b30, 3, 30); rimR.position.set(0,2,7); scene.add(rimR); // taillight glow behind car
+
+const ROADW=13, LEN=320;
+// wet asphalt
+const road=new THREE.Mesh(new THREE.PlaneGeometry(ROADW, LEN),
+  new THREE.MeshStandardMaterial({color:0x0c0f18, roughness:.35, metalness:.5}));
+road.rotation.x=-Math.PI/2; road.position.z=-LEN/2+8; scene.add(road);
+// sidewalks glow lines
+for(const s of [-1,1]){
+  const edge=new THREE.Mesh(new THREE.PlaneGeometry(0.18, LEN),
+    new THREE.MeshBasicMaterial({color:0x22d3ee}));
+  edge.rotation.x=-Math.PI/2; edge.position.set(s*ROADW/2, .02, -LEN/2+8); scene.add(edge);
+}
+// ground beyond road
+const gnd=new THREE.Mesh(new THREE.PlaneGeometry(400, LEN),
+  new THREE.MeshStandardMaterial({color:0x070812, roughness:1}));
+gnd.rotation.x=-Math.PI/2; gnd.position.set(0,-.05,-LEN/2+8); scene.add(gnd);
+
+// recyclable objects move toward +z (camera) at `speed`; wrap when past camera
+const movers=[];
+// centre-lane dashes
+const dashGeo=new THREE.PlaneGeometry(0.28, 3.2);
+const dashMat=new THREE.MeshBasicMaterial({color:0xffd23f});
+for(let i=0;i<26;i++){ const d=new THREE.Mesh(dashGeo,dashMat); d.rotation.x=-Math.PI/2; d.position.set(0,.03,-i*6); d.userData.wrap=-160; scene.add(d); movers.push(d); }
+
+// window texture for buildings (one canvas, reused)
+function windowTex(){
+  const c=document.createElement("canvas"); c.width=32; c.height=64; const g=c.getContext("2d");
+  g.fillStyle="#05060d"; g.fillRect(0,0,32,64);
+  const cols=["#22d3ee","#ff2e97","#ff7a18","#ffffff","#2bff88"];
+  for(let y=2;y<64;y+=5)for(let x=2;x<32;x+=6){ if(Math.random()<0.5){ g.fillStyle=cols[(Math.random()*cols.length)|0]; g.globalAlpha=.5+Math.random()*.5; g.fillRect(x,y,3,3);} }
+  const t=new THREE.CanvasTexture(c); t.magFilter=THREE.NearestFilter; return t;
+}
+const winTex=windowTex();
+function makeBuilding(side,z){
+  const w=6+Math.random()*6, h=18+Math.random()*40, d=6+Math.random()*6;
+  const tex=winTex.clone(); tex.needsUpdate=true; tex.wrapS=tex.wrapT=THREE.RepeatWrapping; tex.repeat.set(Math.round(w/2),Math.round(h/4));
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),
+    new THREE.MeshStandardMaterial({color:0x0b0e1a, emissive:0xffffff, emissiveMap:tex, emissiveIntensity:1.0, roughness:.8, metalness:.2}));
+  m.position.set(side*(ROADW/2+4+Math.random()*10), h/2-1, z);
+  m.userData.wrap=-170; scene.add(m); movers.push(m);
+}
+for(let i=0;i<22;i++){ makeBuilding(-1,-i*15-6); makeBuilding(1,-i*15-12); }
+// neon street poles
+const poleMat=new THREE.MeshBasicMaterial({color:0xff2e97});
+for(let i=0;i<20;i++)for(const s of [-1,1]){ const p=new THREE.Mesh(new THREE.BoxGeometry(.2,5,.2),poleMat); p.position.set(s*(ROADW/2+.6),2.5,-i*16); p.userData.wrap=-160; scene.add(p); movers.push(p); }
+
+/* ---- the car (rear view), built from primitives ---- */
+const car=new THREE.Group();
+const bodyMat=new THREE.MeshStandardMaterial({color:0xe6e60a, roughness:.35, metalness:.6});
+const body=new THREE.Mesh(new THREE.BoxGeometry(2,0.5,4.2),bodyMat); body.position.y=.75; car.add(body);
+const hood=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.35,1.6),bodyMat); hood.position.set(0,1.0,-1.1); car.add(hood);
+const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.7,0.6,1.7),new THREE.MeshStandardMaterial({color:0x0a0a12,roughness:.2,metalness:.8})); cabin.position.set(0,1.15,.2); car.add(cabin);
+// rear wing
+const wingMat=new THREE.MeshStandardMaterial({color:0x111,roughness:.5});
+const wing=new THREE.Mesh(new THREE.BoxGeometry(2.1,0.12,0.7),wingMat); wing.position.set(0,1.5,2.1); car.add(wing);
+for(const x of [-0.85,0.85]){ const post=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.5,0.12),wingMat); post.position.set(x,1.25,2.1); car.add(post); }
+// taillights (facing camera) — bright emissive
+const tlMat=new THREE.MeshBasicMaterial({color:0xff2222});
+for(const x of [-0.7,0.7]){ const tl=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.18,0.1),tlMat); tl.position.set(x,0.8,2.15); car.add(tl); }
+// wheels
+const wheelGeo=new THREE.CylinderGeometry(0.45,0.45,0.35,16); const wheelMat=new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:.9});
+for(const x of [-0.95,0.95])for(const z of [-1.3,1.4]){ const w=new THREE.Mesh(wheelGeo,wheelMat); w.rotation.z=Math.PI/2; w.position.set(x,0.45,z); car.add(w); }
+car.position.set(0,0,0); scene.add(car);
+// headlight cones lighting the road ahead
+const hl=new THREE.SpotLight(0xfff2cc, 60, 90, 0.5, 0.5, 1.2); hl.position.set(0,1.4,-1); hl.target.position.set(0,0,-40); scene.add(hl); scene.add(hl.target);
+
+/* ---------------- drive state ---------------- */
+let speed=0, targetSpeed=6, phase="connecting", shake=0;
+const clock=new THREE.Clock();
+function resize(){ renderer.setSize(innerWidth,innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+addEventListener("resize",resize); resize();
+
+function frame(){
+  requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),0.05);
+  speed += (targetSpeed-speed)*Math.min(1,dt*2.5);
+  const move=speed*dt;
+  for(const m of movers){ m.position.z += move; if(m.position.z>12){ m.position.z += m.userData.wrap; } }
+  // wheels spin illusion via road; car idle bob + speed sway
+  const t=performance.now()/1000;
+  car.position.y = Math.sin(t*8)*0.02*(speed>10?1:0.3);
+  car.rotation.z = Math.sin(t*1.3)*0.015*(speed/40);
+  car.position.x = Math.sin(t*0.7)*0.25*(speed/50);
+  camera.position.x = car.position.x*0.7;
+  // FOV pushes with speed for a sense of velocity
+  const fov=72+Math.min(20, speed*0.18); camera.fov += (fov-camera.fov)*0.1; camera.updateProjectionMatrix();
+  if(shake>0){ camera.position.x+=(Math.random()-.5)*shake; camera.position.y=3.1+(Math.random()-.5)*shake; shake*=0.9; if(shake<0.01)shake=0; }
+  else camera.position.y += (3.1-camera.position.y)*0.1;
+  camera.lookAt(car.position.x, 1.4, -20);
+  renderer.render(scene,camera);
+}
+frame();
+
+function setSpeedHud(mult){ const kmh=Math.round(40+ (mult-1)*95); $("spd").textContent=Math.max(0,kmh); }
+
+/* ---------------- RGS (crash engine, gameId pulse) ---------------- */
 const RGS = new URLSearchParams(location.search).get("rgs") || `${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws`;
 const GAME = new URLSearchParams(location.search).get("game") || "pulse";
-const MINOR = 100;
-const fmt = (m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-const randHex = (n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
-
-let ws, phase="connecting";           // connecting | betting | running | between
-let myBet=null;                        // {betId, stake, cashed:false} for the CURRENT round
-let placing=false, mult=1;
+const MINOR=100; const fmt=(m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const randHex=(n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
+let ws, gphase="connecting", myBet=null, placing=false;
 
 function setStatus(t){ $("status").textContent=t; }
 function buttons(){
-  // can bet only during the betting window and only if not already in
-  $("btnBet").disabled = !(phase==="betting" && !myBet && !placing);
-  // can cash only while running with a live, un-cashed bet
-  $("btnCash").disabled = !(phase==="running" && myBet && !myBet.cashed);
-  $("bet").disabled = !(phase==="betting" && !myBet);
-  $("auto").disabled = !(phase==="betting" && !myBet);
+  $("btnBet").disabled=!(gphase==="betting"&&!myBet&&!placing);
+  $("btnCash").disabled=!(gphase==="running"&&myBet&&!myBet.cashed);
+  $("bet").disabled=!(gphase==="betting"&&!myBet); $("auto").disabled=!(gphase==="betting"&&!myBet);
 }
-function curStake(){ return Math.round(parseFloat($("bet").value||"0")*MINOR); }
-function autoVal(){ const v=parseFloat($("auto").value||"0"); return v>=1.01? v : undefined; }
+const curStake=()=>Math.round(parseFloat($("bet").value||"0")*MINOR);
+const autoVal=()=>{const v=parseFloat($("auto").value||"0");return v>=1.01?v:undefined;};
+function flash(c){ const f=$("flash"); f.style.background=c; f.style.opacity=".55"; setTimeout(()=>f.style.opacity="0",120); }
 
 function connect(){
   ws=new WebSocket(RGS);
   ws.onopen=()=>ws.send(JSON.stringify({type:"hello",sessionToken:"overdrive-"+randHex(3),mode:"demo",gameId:GAME}));
-  ws.onclose=()=>{ setStatus("disconnected · reconnecting…"); phase="connecting"; buttons(); setTimeout(()=>{ if(phase==="connecting") connect(); },1500); };
-  ws.onerror=()=> setStatus("can't reach the game server on "+RGS);
+  ws.onclose=()=>{ setStatus("disconnected · reconnecting…"); gphase="connecting"; targetSpeed=6; buttons(); setTimeout(()=>{if(gphase==="connecting")connect();},1500); };
+  ws.onerror=()=>setStatus("can't reach the game server on "+RGS);
   ws.onmessage=(ev)=>handle(JSON.parse(ev.data));
 }
-
 function handle(m){
   switch(m.type){
-    case "welcome":
-      $("bal").textContent=fmt(m.balance); $("pool").textContent="🏆 pool "+fmt(m.moonPool);
-      phase="between"; setStatus("connected · waiting for the next run"); buttons();
-      break;
+    case "welcome": $("bal").textContent=fmt(m.balance); gphase="between"; setStatus("connected · waiting for the next run"); targetSpeed=6; buttons(); break;
     case "round_open":
-      // new betting window
-      myBet=null; placing=false; mult=1; phase="betting";
-      $("pool").textContent="🏆 pool "+fmt(m.moonPool);
-      $("road").classList.remove("run"); $("seal").classList.remove("on");
-      $("big").className="big"; $("big").textContent="1.00×"; $("car").textContent="🏎️";
-      $("lbl").textContent="grid open — floor it to join this run";
-      $("fair").innerHTML=`fair commit <b>${m.round.commitment.slice(0,20)}…</b> · round #${m.round.roundNumber}`;
-      setStatus("grid open · place your bet"); buttons();
-      break;
-    case "bet_accepted":
-      myBet={betId:m.betId, stake:m.stake, cashed:false}; placing=false;
-      $("bal").textContent=fmt(m.balance);
-      $("lbl").textContent="you're in — hold for launch"; setStatus("bet placed · waiting for launch"); buttons();
-      break;
-    case "betting_closed":
-      phase="running"; $("road").classList.add("run"); $("big").className="big run";
-      $("lbl").textContent = myBet? "GO — cash out before it seals" : "watching this run";
-      setStatus("launched · "+(myBet?"cash out any time":"bet on the next run")); buttons();
-      break;
+      myBet=null; placing=false; gphase="betting"; targetSpeed=7;
+      $("big").className="big"; $("big").textContent="1.00×"; $("lbl").textContent="grid open — floor it to launch"; setSpeedHud(1);
+      $("fair").innerHTML=`DOWNTOWN · fair commit <b>${m.round.commitment.slice(0,14)}…</b>`;
+      setStatus("grid open · place your bet"); buttons(); break;
+    case "bet_accepted": myBet={betId:m.betId,stake:m.stake,cashed:false}; placing=false; $("bal").textContent=fmt(m.balance); $("lbl").textContent="you're in — hold for launch"; buttons(); break;
+    case "betting_closed": gphase="running"; $("big").className="big run"; $("lbl").textContent=myBet?"GO — cash out before it seals":"watching this run"; setStatus("launched"); buttons(); break;
     case "tick":
-      mult=m.multiplier; $("big").textContent=mult.toFixed(2)+"×";
-      // car eases up the tunnel as the multiplier climbs
-      $("car").style.bottom = Math.min(150, 26 + Math.log2(mult)*26) + "px";
-      if(myBet && !myBet.cashed) $("lbl").textContent = "cash value "+fmt(Math.floor(myBet.stake*mult));
+      $("big").textContent=m.multiplier.toFixed(2)+"×"; setSpeedHud(m.multiplier);
+      targetSpeed=18+ (m.multiplier-1)*26; // faster as the multiplier climbs
+      if(myBet&&!myBet.cashed) $("lbl").textContent="cash value "+fmt(Math.floor(myBet.stake*m.multiplier));
       break;
     case "cash_out":
-      if(myBet && m.betId===myBet.betId){ myBet.cashed=true; }
-      $("bal").textContent=fmt(m.balance);
-      $("big").className="big"; $("big").style.color="var(--green)";
-      $("lbl").textContent=`escaped 🏁 at ${m.multiplier.toFixed(2)}× · +${fmt(m.payout)}`;
-      setStatus(`cashed out ${m.multiplier.toFixed(2)}× for ${fmt(m.payout)} credits`); buttons();
-      break;
-    case "jackpot":
-      $("bal").textContent=fmt(m.balance);
-      $("feed").innerHTML=`🏆 JACKPOT +${fmt(m.award)}!`;
-      break;
+      if(myBet&&m.betId===myBet.betId) myBet.cashed=true; $("bal").textContent=fmt(m.balance);
+      $("big").className="big"; $("big").style.color="var(--green)"; $("lbl").textContent=`escaped 🏁 ${m.multiplier.toFixed(2)}× · +${fmt(m.payout)}`;
+      flash("#0b3"); setStatus(`cashed out ${m.multiplier.toFixed(2)}× for ${fmt(m.payout)}`); buttons(); break;
+    case "jackpot": $("bal").textContent=fmt(m.balance); break;
     case "crash":{
-      phase="between"; const r=m.round;
-      $("road").classList.remove("run"); $("seal").classList.add("on");
-      $("big").className="big bust"; $("big").textContent=r.crashPoint.toFixed(2)+"×";
-      $("pool").textContent="🏆 pool "+fmt(m.moonPool);
-      if(myBet && !myBet.cashed){ $("car").textContent="💥"; $("lbl").textContent=`sealed at ${r.crashPoint.toFixed(2)}× — you were caught`; }
-      else if(!myBet){ $("lbl").textContent=`sealed at ${r.crashPoint.toFixed(2)}×`; }
-      $("fair").innerHTML=`revealed seed <b>${r.serverSeed.slice(0,18)}…</b> · crash <b>${r.crashPoint.toFixed(2)}×</b> · SHA-256(seed)=commit <span class="ok">✓ verifiable</span>`;
-      setStatus(`sealed at ${r.crashPoint.toFixed(2)}× · next run shortly`);
-      myBet=null; buttons();
-      break;
+      gphase="between"; const r=m.round; targetSpeed=0; shake=0.5; flash("#a00");
+      $("big").className="big bust"; $("big").textContent=r.crashPoint.toFixed(2)+"×"; setSpeedHud(1);
+      $("lbl").textContent = (myBet&&!myBet.cashed)?`WALL SEALED at ${r.crashPoint.toFixed(2)}× — wrecked`:`sealed at ${r.crashPoint.toFixed(2)}×`;
+      $("fair").innerHTML=`revealed <b>${r.serverSeed.slice(0,14)}…</b> · crash <b>${r.crashPoint.toFixed(2)}×</b> · <span class="ok">✓ verifiable</span>`;
+      setStatus(`sealed at ${r.crashPoint.toFixed(2)}× · next run shortly`); myBet=null; buttons(); break;
     }
     case "balance": $("bal").textContent=fmt(m.balance); break;
     case "error": setStatus("⚠ "+m.message); placing=false; buttons(); break;
   }
 }
-
-$("btnBet").onclick=()=>{
-  const stake=curStake(); if(!(stake>0)) return setStatus("enter a bet");
-  placing=true; buttons();
-  ws.send(JSON.stringify({type:"place_bet",stake,autoCashOut:autoVal(),clientEntropy:randHex(16)}));
-  setStatus("placing bet…");
-};
-$("btnCash").onclick=()=>{ if(myBet && !myBet.cashed) ws.send(JSON.stringify({type:"cash_out",betId:myBet.betId})); };
+$("btnBet").onclick=()=>{ const s=curStake(); if(!(s>0))return setStatus("enter a bet"); placing=true; buttons(); ws.send(JSON.stringify({type:"place_bet",stake:s,autoCashOut:autoVal(),clientEntropy:randHex(16)})); setStatus("placing bet…"); };
+$("btnCash").onclick=()=>{ if(myBet&&!myBet.cashed) ws.send(JSON.stringify({type:"cash_out",betId:myBet.betId})); };
 $("half").onclick=()=>$("bet").value=Math.max(1,Math.floor(parseFloat($("bet").value||"1")/2));
 $("dbl").onclick=()=>$("bet").value=Math.floor(parseFloat($("bet").value||"1")*2);
-
 connect();
 </script>
 </body>
