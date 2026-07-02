@@ -1,0 +1,63 @@
+/* ============================================================
+   Clutch Studios — shared game UI kit
+   One design language across every title. Each game sets its own
+   --accent1 / --accent2 (theme) and keeps its own board styles.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  --ink:#05060f; --panel:rgba(14,17,28,.66); --panel2:rgba(10,13,24,.9);
+  --line:rgba(255,255,255,.12); --text:#f4f7ff; --muted:#93a0ba;
+  --green:#2BFF88; --rug:#FF3653; --gold:#FFD23F;
+  --accent1:#22D3EE; --accent2:#8B3FFF;                 /* overridden per game */
+  --display:'Fredoka',system-ui,sans-serif; --mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--display);color:var(--text);-webkit-font-smoothing:antialiased;touch-action:manipulation;
+  background:
+    radial-gradient(circle at 12% 6%,color-mix(in srgb,var(--accent1) 18%,transparent),transparent 45%),
+    radial-gradient(circle at 88% 2%,color-mix(in srgb,var(--accent2) 18%,transparent),transparent 45%),
+    var(--ink);
+  min-height:100vh;overflow-x:hidden}
+
+.cs-app{width:100%;max-width:720px;margin:0 auto;padding:16px 14px 18px;display:flex;flex-direction:column;min-height:100vh}
+.cs-header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cs-logo{font-weight:700;font-size:24px;letter-spacing:.3px;display:flex;align-items:center;gap:8px;
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 12px color-mix(in srgb,var(--accent2) 45%,transparent))}
+.cs-bal{text-align:right;font-family:var(--mono)} .cs-bal .v{font-size:19px;color:#fff}.cs-bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
+.cs-state{align-self:flex-start;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);margin-top:8px;transition:.2s}
+.cs-state.is-live{color:#04150c;background:linear-gradient(90deg,var(--green),var(--accent1));border-color:transparent}
+.cs-state.is-idle{color:#1a0f02;background:linear-gradient(90deg,var(--gold),#ff9f1c);border-color:transparent}
+.cs-state.is-win{color:#04150c;background:linear-gradient(90deg,var(--green),var(--gold));border-color:transparent}
+.cs-state.is-lose{color:#fff;background:var(--rug);border-color:transparent}
+
+/* history pills */
+.cs-hist{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:22px}
+.cs-pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted)}
+.cs-pill.mid{color:#9ff0ff;border-color:rgba(34,211,238,.4)} .cs-pill.hi{color:var(--gold);border-color:rgba(255,210,63,.5)} .cs-pill.mega{color:#ff8fd0;border-color:rgba(255,46,151,.6)} .cs-pill.lose{color:#ff9aa6;border-color:rgba(255,54,83,.4)}
+
+/* dock / bet panel */
+.cs-dock{margin-top:auto;padding-top:12px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.cs-count{width:min(680px,100%);height:5px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+.cs-count>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--gold),#ff9f1c);transition:width .1s linear}
+.cs-panel{width:min(680px,100%);background:var(--panel);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--line);border-radius:20px;padding:12px;display:grid;grid-template-columns:1fr 1.25fr;gap:10px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+.cs-stakecol{display:flex;flex-direction:column;gap:8px}
+.cs-field{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:8px 12px}
+.cs-field label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block}
+.cs-field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none;min-width:0}
+.cs-chips{display:flex;gap:6px}
+.cs-chip{flex:1;font-family:var(--mono);font-size:12px;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;padding:7px 0;cursor:pointer;text-align:center;transition:.1s}
+.cs-chip:hover{color:#fff;border-color:var(--accent1)}
+.cs-actioncol{display:flex;flex-direction:column;gap:8px;justify-content:center}
+.cs-btn{border:none;border-radius:16px;cursor:pointer;font-family:var(--display);font-weight:700;transition:.1s;color:#08131f;line-height:1.1}
+.cs-btn:active{transform:scale(.985)} .cs-btn:disabled{opacity:.38;cursor:not-allowed}
+.cs-btn.primary{background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#08131f;font-size:19px;min-height:54px}
+.cs-btn.go{background:linear-gradient(135deg,var(--green),var(--accent1));color:#04150c;font-size:18px;min-height:50px}
+.cs-btn.cash{background:linear-gradient(135deg,var(--gold),var(--green));color:#052113;font-size:17px;min-height:50px}
+.cs-row2{display:flex;gap:8px}.cs-row2 .cs-btn{flex:1}
+.cs-fair{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.55);margin-top:10px;text-align:center}
+.cs-fair b{color:var(--accent1)} .cs-fair .ok{color:var(--green)}
+@media(max-width:560px){ .cs-panel{grid-template-columns:1fr} }

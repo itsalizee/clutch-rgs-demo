@@ -3,184 +3,106 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Vault — provably-fair mines demo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<title>Vault — provably-fair mines</title>
+<link rel="stylesheet" href="/shared/clutch.css" />
 <style>
-  :root{
-    --gold:#FFD23F;--teal:#22D3EE;--green:#2BFF88;--purple:#8B3FFF;--rug:#FF3653;--amber:#FF9F1C;
-    --bg:#070b12;--panel:#0e1626;--text:#eaf2ff;--muted:#8aa0bd;
-    --display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{font-family:var(--display);color:var(--text);background:
-    radial-gradient(circle at 15% 8%,rgba(255,210,63,.14),transparent 45%),
-    radial-gradient(circle at 85% 0%,rgba(34,211,238,.13),transparent 45%),var(--bg);
-    min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:16px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-  .app{width:100%;max-width:560px}
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px;flex-wrap:wrap}
-  .logo{font-weight:700;font-size:26px;letter-spacing:-.5px;background:linear-gradient(90deg,var(--gold),var(--amber) 55%,var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .bal{font-family:var(--mono);font-size:14px;color:var(--gold)}.bal b{color:#fff}
-  .status{font-family:var(--mono);font-size:12px;color:var(--muted);min-height:16px;margin-bottom:8px;letter-spacing:.5px}
-
-  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px;border-radius:18px;
-    background:linear-gradient(180deg,var(--panel),#0a1020);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 0 50px rgba(0,0,0,.5)}
-  .tile{aspect-ratio:1;border-radius:12px;border:1px solid rgba(255,255,255,.1);cursor:pointer;
+  :root{ --accent1:#22D3EE; --accent2:#FFD23F; }
+  .board{margin-top:12px;padding:14px;border-radius:20px;background:linear-gradient(180deg,rgba(16,22,38,.9),rgba(8,12,24,.95));border:1px solid var(--line);box-shadow:inset 0 0 50px rgba(0,0,0,.5)}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .tile{aspect-ratio:1;border-radius:13px;border:1px solid rgba(255,255,255,.1);cursor:pointer;
     background:radial-gradient(circle at 35% 30%,#1c2740,#101828);display:flex;align-items:center;justify-content:center;
-    font-size:26px;transition:transform .1s, background .2s, border-color .2s;user-select:none}
-  .tile:hover:not(.done){transform:translateY(-2px);border-color:var(--teal)}
-  .tile.safe{background:radial-gradient(circle at 35% 30%,#123a2a,#0a2018);border-color:var(--green);box-shadow:0 0 14px rgba(43,255,136,.3)}
-  .tile.mine{background:radial-gradient(circle at 35% 30%,#3a1018,#20080e);border-color:var(--rug);box-shadow:0 0 16px rgba(255,54,83,.5)}
-  .tile.ghost{opacity:.4}
+    font-size:26px;transition:transform .1s, background .2s, border-color .2s, box-shadow .2s;user-select:none}
+  .tile:hover:not(.done){transform:translateY(-2px);border-color:var(--accent1);box-shadow:0 0 14px rgba(34,211,238,.3)}
+  .tile.safe{background:radial-gradient(circle at 35% 30%,#123a2a,#0a2018);border-color:var(--green);box-shadow:0 0 18px rgba(43,255,136,.45)}
+  .tile.mine{background:radial-gradient(circle at 35% 30%,#3a1018,#20080e);border-color:var(--rug);box-shadow:0 0 20px rgba(255,54,83,.6)}
   .tile.done{cursor:default}
-  .meter{display:flex;align-items:center;justify-content:space-between;margin:12px 2px 0;font-family:var(--mono);font-size:13px}
-  .meter .cur{color:var(--green);font-weight:700;font-size:20px}
-  .meter .next{color:var(--muted)}
-  .fair{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.5);margin:8px 2px 0}.fair b{color:var(--amber)}.fair .ok{color:var(--green)}
-
-  .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-  .field{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 14px}
-  .field label{display:block;font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
-  .field .row{display:flex;align-items:center;gap:8px}
-  .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none}
-  .mini{font-family:var(--mono);font-size:11px;color:var(--muted);background:rgba(255,255,255,.07);border-radius:7px;padding:5px 8px;cursor:pointer}
-  .mini:hover{color:#fff}
-  .act{display:flex;gap:10px;margin-top:10px}
-  button.big{flex:1;min-height:50px;border:none;border-radius:14px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:18px;color:#0a1a12;transition:.1s}
-  button.big:active{transform:scale(.98)}
-  button.big:disabled{opacity:.4;cursor:not-allowed}
-  .btn-bet{background:linear-gradient(135deg,var(--teal),var(--green))}
-  .btn-cash{background:linear-gradient(135deg,var(--gold),var(--amber));color:#2a1400}
-  footer{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+  .meter{display:flex;align-items:baseline;justify-content:space-between;margin:14px 4px 0;font-family:var(--mono)}
+  .meter .cur{color:var(--green);font-weight:700;font-size:30px;text-shadow:0 0 20px currentColor} .meter .cur.dim{color:var(--muted);text-shadow:none}
+  .meter .next{color:var(--muted);font-size:12px;text-align:right}
+  .stepper{display:flex;align-items:center;gap:6px}
+  .stepper button{font-family:var(--mono);font-size:14px;color:var(--muted);background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:8px;width:30px;height:30px;cursor:pointer}
+  .stepper button:hover{color:#fff}
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="logo">💎 Vault</div>
-    <div class="bal"><b id="bal">—</b> credits</div>
-  </header>
-  <div class="status" id="status">connecting to the game server…</div>
-
-  <div class="grid" id="grid"></div>
-
-  <div class="meter">
-    <span class="cur" id="cur">—</span>
-    <span class="next" id="next"></span>
+<div class="cs-app">
+  <div class="cs-header">
+    <div class="cs-logo">💎 Vault</div>
+    <div class="cs-bal"><div class="v"><span id="bal">—</span></div><div class="u">CREDITS</div></div>
   </div>
-  <div class="fair" id="fair"></div>
+  <div class="cs-state" id="state">connecting…</div>
 
-  <div class="controls">
-    <div class="field"><label>bet (credits)</label><div class="row"><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"><span class="mini" id="half">½</span><span class="mini" id="dbl">2×</span></div></div>
-    <div class="field"><label>mines</label><div class="row"><input id="mines" type="number" value="3" min="1" max="24" step="1" inputmode="numeric"><span class="mini" id="mdown">−</span><span class="mini" id="mup">+</span></div></div>
+  <div class="board">
+    <div class="grid" id="grid"></div>
+    <div class="meter"><span class="cur dim" id="cur">—</span><span class="next" id="next"></span></div>
   </div>
-  <div class="act">
-    <button class="big btn-bet" id="btnBet" disabled>Crack the vault 💎</button>
-    <button class="big btn-cash" id="btnCash" disabled>Cash out</button>
-  </div>
+  <div class="cs-fair" id="fair">provably fair · mines placed server-side, revealed at run end</div>
 
-  <footer id="foot">Play-money demo · provably fair · the mines are placed server-side before you pick and revealed only when the run ends.</footer>
+  <div class="cs-dock">
+    <div class="cs-panel">
+      <div class="cs-stakecol">
+        <div class="cs-field"><div style="flex:1"><label>bet</label><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"></div></div>
+        <div class="cs-chips"><button class="cs-chip" data-chip="10">+10</button><button class="cs-chip" data-chip="50">+50</button><button class="cs-chip" data-chip="half">½</button><button class="cs-chip" data-chip="dbl">2×</button></div>
+        <div class="cs-field"><label style="flex:1">mines</label><div class="stepper"><button id="mdown">−</button><input id="mines" type="number" value="3" min="1" max="24" step="1" inputmode="numeric" style="width:44px;text-align:center;font-size:18px"><button id="mup">+</button></div></div>
+      </div>
+      <div class="cs-actioncol">
+        <button class="cs-btn primary" id="btnBet" disabled>Crack the vault 💎</button>
+        <button class="cs-btn cash" id="btnCash" disabled>Cash out</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script type="module">
 const $=(id)=>document.getElementById(id);
 const RGS = new URLSearchParams(location.search).get("rgs") || `${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws/vault`;
-const MINOR=100;
-const fmt=(m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const MINOR=100; const fmt=(m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 const randHex=(n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
-
 let ws, state="connecting", cfg={tiles:25,minesRange:{min:1,max:24},defaultMines:3}, run=null;
 
-function setStatus(t){ $("status").textContent=t; }
-function buttons(){
-  const idle=state==="idle", running=state==="running";
-  $("btnBet").disabled=!idle;
-  $("btnCash").disabled=!(running && run && run.safe>=1);
-  $("bet").disabled=!idle; $("mines").disabled=!idle;
-}
-function buildGrid(disabled){
-  let html="";
-  for(let i=0;i<cfg.tiles;i++) html+=`<div class="tile${disabled?' ghost done':''}" data-t="${i}" id="t${i}">${disabled?'':''}</div>`;
-  $("grid").innerHTML=html;
-  if(!disabled) [...document.querySelectorAll(".tile")].forEach(t=>t.onclick=()=>pick(+t.dataset.t));
-}
-function pick(i){
-  if(state!=="running"||!run) return;
-  const el=$("t"+i); if(el.classList.contains("done")) return;
-  ws.send(JSON.stringify({type:"reveal",runId:run.runId,tile:i}));
-}
-function showNext(){
-  if(!run) return;
-  const lad=run.ladder, k=run.safe;
-  $("cur").textContent = k>=1 ? lad[k-1].toFixed(2)+"×" : "—";
-  $("next").textContent = k<lad.length ? "next "+lad[k].toFixed(2)+"× · cash "+fmt(Math.floor(run.stake*(k>=1?lad[k-1]:0))) : "vault cleared!";
-}
+function setState(txt,cls){ const el=$("state"); el.textContent=txt; el.className="cs-state"+(cls?" "+cls:""); }
+function buttons(){ const idle=state==="idle", running=state==="running";
+  $("btnBet").disabled=!idle; $("btnCash").disabled=!(running&&run&&run.safe>=1);
+  $("bet").disabled=!idle; $("mines").disabled=!idle; }
+function buildGrid(disabled){ let h=""; for(let i=0;i<cfg.tiles;i++) h+=`<div class="tile${disabled?' done':''}" data-t="${i}" id="t${i}"></div>`; $("grid").innerHTML=h;
+  if(!disabled) [...document.querySelectorAll(".tile")].forEach(t=>t.onclick=()=>pick(+t.dataset.t)); }
+function pick(i){ if(state!=="running"||!run)return; const el=$("t"+i); if(el.classList.contains("done"))return; ws.send(JSON.stringify({type:"reveal",runId:run.runId,tile:i})); }
+function showNext(){ if(!run)return; const lad=run.ladder,k=run.safe;
+  $("cur").textContent=k>=1?lad[k-1].toFixed(2)+"×":"—"; $("cur").className="cur"+(k>=1?"":" dim");
+  $("next").textContent=k<lad.length?"next "+lad[k].toFixed(2)+"×  ·  cash "+fmt(Math.floor(run.stake*(k>=1?lad[k-1]:0))):"vault cleared!"; }
+const curStake=()=>Math.round(parseFloat($("bet").value||"0")*MINOR);
 
-function connect(){
-  ws=new WebSocket(RGS);
+function connect(){ ws=new WebSocket(RGS);
   ws.onopen=()=>ws.send(JSON.stringify({type:"hello",sessionToken:"vault-"+randHex(3),mode:"demo"}));
-  ws.onclose=()=>{ setStatus("disconnected · reconnecting…"); state="connecting"; buttons(); setTimeout(()=>{ if(state==="connecting") connect(); },1500); };
-  ws.onerror=()=> setStatus("can't reach the game server on "+RGS);
-  ws.onmessage=(ev)=>handle(JSON.parse(ev.data));
-}
-function handle(m){
-  switch(m.type){
-    case "welcome":
-      cfg={tiles:m.tiles,minesRange:m.minesRange,defaultMines:m.defaultMines};
-      $("bal").textContent=fmt(m.balance); $("mines").value=m.defaultMines;
-      $("mines").min=m.minesRange.min; $("mines").max=m.minesRange.max;
-      state="idle"; buildGrid(true); buttons();
-      setStatus("ready · set your bet & mines, then crack the vault"); $("cur").textContent="—"; $("next").textContent="";
-      break;
-    case "run_open":
-      run={...m.run, safe:0, stake:curStake()}; $("bal").textContent=fmt(m.balance);
-      state="running"; buildGrid(false); buttons();
-      $("fair").innerHTML=`fair commit <b>${run.commitment.slice(0,18)}…</b> · ${run.mines} mines hidden`;
-      setStatus(`live · ${run.mines} mines · pick a tile or cash out`); showNext();
-      break;
-    case "reveal":{
-      run.safe=m.safe; const el=$("t"+m.tile); el.classList.add("safe","done"); el.textContent="💎";
-      showNext(); buttons();
-      break;
-    }
-    case "run_over":{
-      const r=m.reveal;
-      // paint all mines
-      r.mines.forEach(t=>{ const el=$("t"+t); if(el && !el.classList.contains("safe")){ el.classList.add("mine","done"); el.textContent="💣"; } });
-      [...document.querySelectorAll(".tile")].forEach(t=>t.classList.add("done"));
-      if(m.status==="boom"){
-        const el=$("t"+m.tile); el.classList.remove("safe"); el.classList.add("mine"); el.textContent="💥";
-        $("cur").textContent="BUST"; $("cur").style.color="var(--rug)"; $("next").textContent="";
-        setStatus(`💥 hit a mine on tile ${m.tile} · ${r.mines.length} were hidden`);
-      } else {
-        $("cur").textContent="+"+fmt(m.payout)+" ("+m.multiplier.toFixed(2)+"×)"; $("cur").style.color="var(--green)"; $("next").textContent=m.safe>=(cfg.tiles-run.mines)?"vault cleared! 🏆":"";
-        setStatus(`banked ${fmt(m.payout)} credits at ${m.multiplier.toFixed(2)}×`);
-      }
-      $("bal").textContent=fmt(m.balance);
-      $("fair").innerHTML=`revealed seed <b>${r.serverSeed.slice(0,18)}…</b> · mines [${r.mines.join(", ")}] · SHA-256(seed)=commit <span class="ok">✓ verifiable</span>`;
-      state="idle"; run=null; buttons();
-      break;
-    }
-    case "error": setStatus("⚠ "+m.message); if(state==="running"){/*keep*/} else {state="idle";} buttons(); break;
-  }
-}
-function curStake(){ return Math.round(parseFloat($("bet").value||"0")*MINOR); }
+  ws.onclose=()=>{ setState("reconnecting…"); state="connecting"; buttons(); setTimeout(()=>{if(state==="connecting")connect();},1500); };
+  ws.onerror=()=>setState("server unreachable","is-lose"); ws.onmessage=(ev)=>handle(JSON.parse(ev.data)); }
+function handle(m){ switch(m.type){
+  case "welcome": cfg={tiles:m.tiles,minesRange:m.minesRange,defaultMines:m.defaultMines};
+    $("bal").textContent=fmt(m.balance); $("mines").value=m.defaultMines; $("mines").min=m.minesRange.min; $("mines").max=m.minesRange.max;
+    state="idle"; buildGrid(true); buttons(); setState("ready · set bet & mines","is-idle"); $("cur").textContent="—"; $("cur").className="cur dim"; $("next").textContent=""; break;
+  case "run_open": run={...m.run,safe:0,stake:curStake()}; $("bal").textContent=fmt(m.balance);
+    state="running"; buildGrid(false); buttons(); $("fair").innerHTML=`fair commit <b>${run.commitment.slice(0,16)}…</b> · ${run.mines} mines hidden`;
+    setState("live · "+run.mines+" mines","is-live"); showNext(); break;
+  case "reveal": run.safe=m.safe; const el=$("t"+m.tile); el.classList.add("safe","done"); el.textContent="💎"; showNext(); buttons(); break;
+  case "run_over":{ const r=m.reveal;
+    r.mines.forEach(t=>{const e=$("t"+t); if(e&&!e.classList.contains("safe")){e.classList.add("mine","done");e.textContent="💣";}});
+    [...document.querySelectorAll(".tile")].forEach(t=>t.classList.add("done"));
+    if(m.status==="boom"){ const e=$("t"+m.tile); e.classList.remove("safe"); e.classList.add("mine"); e.textContent="💥";
+      $("cur").textContent="BUST"; $("cur").style.color="var(--rug)"; $("next").textContent=""; setState(`💥 mine on tile ${m.tile}`,"is-lose"); }
+    else { $("cur").textContent="+"+fmt(m.payout); $("cur").style.color="var(--green)"; $("next").textContent=m.multiplier.toFixed(2)+"× banked"; setState("banked "+m.multiplier.toFixed(2)+"×","is-win"); }
+    $("bal").textContent=fmt(m.balance); $("fair").innerHTML=`revealed <b>${r.serverSeed.slice(0,16)}…</b> · mines [${r.mines.join(", ")}] · SHA-256(seed)=commit <span class="ok">✓</span>`;
+    state="idle"; run=null; buttons(); break; }
+  case "error": setState("⚠ "+m.code); if(state!=="running")state="idle"; buttons(); break; } }
 
-$("btnBet").onclick=()=>{
-  const stake=curStake(); if(!(stake>0)) return setStatus("enter a bet");
+$("btnBet").onclick=()=>{ const s=curStake(); if(!(s>0))return setState("enter a bet","is-lose");
   const mines=Math.max(cfg.minesRange.min,Math.min(cfg.minesRange.max,parseInt($("mines").value||"3",10)));
-  ws.send(JSON.stringify({type:"open_run",stake,mines,clientEntropy:randHex(16)}));
-  state="betting"; buttons();
-};
-$("btnCash").onclick=()=>{ if(run && run.safe>=1) ws.send(JSON.stringify({type:"cash_out",runId:run.runId})); };
-$("half").onclick=()=>$("bet").value=Math.max(1,Math.floor(parseFloat($("bet").value||"1")/2));
-$("dbl").onclick=()=>$("bet").value=Math.floor(parseFloat($("bet").value||"1")*2);
+  $("cur").style.color=""; ws.send(JSON.stringify({type:"open_run",stake:s,mines,clientEntropy:randHex(16)})); state="betting"; buttons(); };
+$("btnCash").onclick=()=>{ if(run&&run.safe>=1) ws.send(JSON.stringify({type:"cash_out",runId:run.runId})); };
+document.querySelectorAll(".cs-chip").forEach(b=>b.onclick=()=>{ const c=b.dataset.chip,v=parseFloat($("bet").value||"0");
+  if(c==="half")$("bet").value=Math.max(1,Math.floor(v/2)); else if(c==="dbl")$("bet").value=Math.max(1,Math.floor(v*2)); else $("bet").value=Math.floor(v+ +c); });
 $("mdown").onclick=()=>$("mines").value=Math.max(cfg.minesRange.min,(parseInt($("mines").value||"3",10)-1));
 $("mup").onclick=()=>$("mines").value=Math.min(cfg.minesRange.max,(parseInt($("mines").value||"3",10)+1));
-
-buildGrid(true);
-connect();
+buildGrid(true); connect();
 </script>
 </body>
 </html>
