@@ -12,16 +12,16 @@ Rules that make these work:
 ---
 
 ## A — Cold email, tech-led (default)
-**Subject:** two provably-fair games, one integration — play them in 60s
+**Subject:** five provably-fair games, one integration — play them in 60s
 
 Hi [First],
 
-I'll keep this short — you can just play it: **https://clutchstudios.co/play**
+I'll keep this short — you can just play them: **https://clutchstudios.co/play**
 
-We're Clutch Studios. We built two crash/instant games — **Ascent** (multiplayer crash)
-and **Ascent Cross** (a step-multiplier climb) — on one server-authoritative, provably-fair
-engine. That means one integration for [Aggregator], and every new title we ship rides the
-same pipe.
+We're Clutch Studios. We built **five provably-fair games across three mechanics** — crash
+(Ascent, Overdrive), step-multiplier (Ascent Cross, Redline), and mines (Vault) — all on one
+server-authoritative engine. That means **one integration** for [Aggregator], three player
+audiences, and every new title we ship rides the same pipe.
 
 [specific hook — e.g., "I saw [Aggregator] leans into crash content; this is a fresh,
 verifiable take on it."]
@@ -60,8 +60,8 @@ looks like the right home for that.
 Hi [First],
 
 Your operators are asking for crash — it's the fastest-growing category and most of them
-have one or two titles they're bored of. We built two fresh ones: **Ascent** and **Ascent
-Cross**, provably fair, on a single integration for [Aggregator].
+have one or two titles they're bored of. We built **five** — crash, step-multiplier and
+mines — all provably fair, all on a single integration for [Aggregator].
 
 Play them: **https://clutchstudios.co/play**
 
@@ -75,10 +75,10 @@ it's a fit?
 ## Follow-ups (send if no reply)
 
 ### F1 — +3 days
-**Subject:** re: two provably-fair games, one integration
+**Subject:** re: five provably-fair games, one integration
 Hi [First] — floating this back up. The 60-second version is just this link:
-**https://clutchstudios.co/play** — play Ascent, then hit the "Ascent Cross" tab. Both run
-on one integration. Worth 20 minutes?
+**https://clutchstudios.co/play** — five games across three mechanics, all on one
+integration. Worth 20 minutes?
 
 ### F2 — +5 days (the one that usually lands)
 **Subject:** the fairness angle for your operators
@@ -98,9 +98,9 @@ appreciate a name.
 ## LinkedIn
 
 ### Connection request (300 char max)
-Hi [First] — I run a new game studio (Clutch Studios). We built two provably-fair crash/
-instant games on one integration; you can play them in the browser in 60s. Would love to
-connect and get your read on whether it fits [Aggregator].
+Hi [First] — I run a new game studio (Clutch Studios). We built five provably-fair crash/
+instant games (three mechanics) on one integration; you can play them in the browser in 60s.
+Would love to connect and get your read on whether it fits [Aggregator].
 
 ### DM after they connect
 Thanks for connecting, [First]! Here's the 60-second version — playable, no signup:
@@ -111,15 +111,15 @@ I'd value your take.
 ---
 
 ## Warm-intro request (to someone in your network)
-Hi [Name] — quick ask. I'm getting Clutch Studios' two games in front of aggregators, and
-I saw you're connected to [First] at [Aggregator]. Would you be open to a quick intro? The
-hook: two provably-fair games on one integration, both playable right now at
+Hi [Name] — quick ask. I'm getting Clutch Studios' games in front of aggregators, and I saw
+you're connected to [First] at [Aggregator]. Would you be open to a quick intro? The hook:
+five provably-fair games across three mechanics on one integration, all playable right now at
 clutchstudios.co/play. Totally fine if not — thanks either way.
 
 ---
 
 ## Subject-line bank (A/B test these)
-- two provably-fair games, one integration — play them in 60s
+- five provably-fair games, one integration — play them in 60s
 - fresh crash content your operators will actually ask for
 - new studio, two live games, built to certify
 - 60 seconds: play our crash game (no signup)
@@ -128,8 +128,9 @@ clutchstudios.co/play. Totally fine if not — thanks either way.
 
 ## One-paragraph blurb (for a form, a Slack, a bio)
 Clutch Studios builds provably-fair crash and instant games for iGaming operators. Our two
-launch titles — Ascent (multiplayer crash) and Ascent Cross (a step-multiplier climb) — run
-on one server-authoritative engine and a single integration, and you can play both in a
-browser right now at clutchstudios.co/play. Every round is player-verifiable. We're a new
-studio offering founding-partner terms, integrating in parallel with GLI/iTech certification.
+five launch titles across three mechanics — crash (Ascent, Overdrive), step-multiplier
+(Ascent Cross, Redline) and mines (Vault) — run on one server-authoritative engine and a
+single integration, and you can play them all in a browser right now at clutchstudios.co/play.
+Every round is player-verifiable. We're a new studio offering founding-partner terms,
+integrating in parallel with GLI/iTech certification.
 team@clutchstudios.co

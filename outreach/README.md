@@ -1,6 +1,6 @@
 # Clutch Studios — Aggregator Outreach Kit
 
-Everything you need to get Ascent + Ascent Cross in front of aggregators and into
+Everything you need to get our five games in front of aggregators and into
 their catalogues. Built to be **honest** — we lead with the tech and the live demo,
 not fake traction. Nothing here claims a certification or license we don't hold.
 
@@ -8,10 +8,14 @@ not fake traction. Nothing here claims a certification or license we don't hold.
 The **live, playable demo**. Most studios pitch with a PDF and a promise; you can
 send a link that an aggregator's BD or product person plays in 60 seconds:
 
-- **Both games:** https://clutch-rgs-demo.onrender.com  *(or clutchstudios.co/play)*
-- **Ascent (crash):** https://clutch-rgs-demo.onrender.com/ascent/
-- **Ascent Cross (climb):** https://clutch-rgs-demo.onrender.com/cross/
-- **Prove fairness live:** /fairness and /fairness/cross on the same host
+- **All five games:** https://clutch-rgs-demo.onrender.com  *(or clutchstudios.co/play)*
+- **Ascent** (crash): `/ascent/`  ·  **Overdrive** (3D turbo car-crash): `/overdrive/`
+- **Ascent Cross** (climb): `/cross/`  ·  **Redline** (racing climb): `/redline/`
+- **Vault** (mines): `/vault/`
+- **Prove fairness live:** `/fairness`, `/fairness/cross`, `/fairness/vault` on the same host
+
+> Five games across **three mechanics** (crash · step-multiplier · mines) — all on one
+> integration. That "range from one supplier" is a stronger hook than any single title.
 
 > If Render is on the free plan it cold-starts (~30s on first hit). Before sending a
 > link to a real prospect, open it once yourself to wake it — or move to the Starter
@@ -20,7 +24,7 @@ send a link that an aggregator's BD or product person plays in 60 seconds:
 ## Files in this kit
 | File | What it's for |
 |---|---|
-| `STUDIO-ONE-PAGER.md` | The leave-behind. One page: both games, the model, honest status. |
+| `STUDIO-ONE-PAGER.md` | The leave-behind. One page: all five games, the model, honest status. |
 | `TARGET-AGGREGATORS.md` | Who to contact, in what order, and why each fits a new studio. |
 | `EMAIL-SEQUENCES.md` | Cold emails, follow-ups, LinkedIn DMs, warm-intro asks, subject lines. |
 | `OBJECTIONS-FAQ.md` | The hard questions aggregators ask — with honest answers. |
@@ -35,7 +39,7 @@ send a link that an aggregator's BD or product person plays in 60 seconds:
 4. **Send the cold email** (`EMAIL-SEQUENCES.md`, template A) with the play link.
 5. **Follow up 3×** over ~2 weeks (templates F1–F3). Most replies come on follow-up 2.
 6. **On a call:** screen-share nothing — have them *play it*. Then walk the fairness
-   page and the "one integration, two games" story. Use `OBJECTIONS-FAQ.md`.
+   page and the "one integration, five games, three mechanics" story. Use `OBJECTIONS-FAQ.md`.
 7. **Log everything** in `pipeline-tracker.csv`. Aggregator onboarding is a quarters-
    long game; the pipeline is the asset.
 

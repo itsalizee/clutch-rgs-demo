@@ -32,7 +32,7 @@ pricing accordingly.
 **"How long is integration?"**
 One REST + WebSocket + seamless-wallet contract. We build a per-aggregator adapter that maps
 to *your* wallet API — debit/credit/rollback, idempotent by txId, integer minor units, with
-auto-reconciliation. Sandbox first; both games ship on the same integration.
+auto-reconciliation. Sandbox first; all five games ship on the same integration.
 
 **"How do you prove fairness?"**
 Live, in the demo: /fairness and /fairness/cross. The server seed is committed (a published
@@ -54,11 +54,12 @@ Server-authoritative core, thin client, idempotent wallet, append-only logs. The
 live today. Production hardening (Postgres-backed durable logs, HA) is on the path to the
 cert deployment; we'll run the system the lab audits.
 
-**"Why crash / why these two games?"**
+**"Why crash / why these games?"**
 Crash is the fastest-growing category — mobile-first, high-frequency, social — and most
-catalogues have only one or two titles. Ascent is a strong crash entry; Ascent Cross is a
-*mechanically different* step-multiplier climb that shares the same engine, so you get two
-distinct player experiences for one integration. More titles ship on the same pipe.
+catalogues have only one or two titles. We ship **five games across three mechanics** on one
+engine: crash (Ascent, Overdrive), step-multiplier (Ascent Cross, Redline), and mines (Vault).
+That's three distinct player audiences from a single integration — and more titles ship on
+the same pipe.
 
 **"What do you need from us?"**
 A sandbox and a short technical spec of your wallet API, and alignment on commercials. We
