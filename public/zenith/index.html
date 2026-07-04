@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Zenith — provably-fair shared-round climb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{ --c1:#22D3EE;--c2:#8B3FFF;--pink:#FF2E97;--gold:#FFD23F;--green:#2BFF88;--rug:#FF3653;
+    --text:#f4f7ff;--muted:#93a0ba;--glass:rgba(12,15,26,.62);--line:rgba(255,255,255,.12);
+    --display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#03040a}
+  body{font-family:var(--display);color:var(--text);-webkit-font-smoothing:antialiased;touch-action:manipulation}
+  #wrap{position:fixed;inset:0} canvas{display:block;width:100%;height:100%}
+  .flash{position:absolute;inset:0;opacity:0;transition:opacity .12s;pointer-events:none;z-index:3;mix-blend-mode:screen}
+  .vig{position:absolute;inset:0;pointer-events:none;z-index:2;background:radial-gradient(130% 90% at 50% 42%,transparent 52%,rgba(0,0,0,.6) 100%)}
+  .hud{position:absolute;inset:0;pointer-events:none;z-index:5;display:flex;flex-direction:column}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px 0}
+  .brand{display:flex;flex-direction:column;gap:8px}
+  .logo{font-weight:700;font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,var(--c1),var(--c2) 60%,var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 14px rgba(139,63,255,.5))}
+  .chip{align-self:flex-start;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--muted)}
+  .chip.live{color:#04150c;background:linear-gradient(90deg,var(--green),var(--c1));border-color:transparent}
+  .chip.bet{color:#1a0f02;background:linear-gradient(90deg,var(--gold),#ff9f1c);border-color:transparent}
+  .chip.bust{color:#fff;background:var(--rug);border-color:transparent}
+  .bal{text-align:right;font-family:var(--mono)} .bal .v{font-size:20px;color:#fff;text-shadow:0 2px 10px #000}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
+  .hist{display:flex;gap:6px;padding:8px 16px 0;flex-wrap:wrap;max-width:74%}
+  .pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted)}
+  .pill.mid{color:#9ff0ff;border-color:rgba(34,211,238,.4)} .pill.hi{color:var(--gold);border-color:rgba(255,210,63,.5)} .pill.mega{color:#ff8fd0;border-color:rgba(255,46,151,.6)}
+  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:-6vh;pointer-events:none}
+  .big{font-weight:700;font-size:14vw;line-height:.9;color:var(--gold);text-shadow:0 0 42px currentColor,0 6px 20px #000;transition:color .12s;letter-spacing:-.02em}
+  .big.run{color:#fff}.big.bust{color:var(--rug)}
+  .sub{font-family:var(--mono);font-size:13px;color:#dfe7f5;text-shadow:0 2px 8px #000;margin-top:4px;letter-spacing:.4px}
+  .alt{position:absolute;right:20px;top:44%;text-align:center;font-family:var(--mono)}
+  .alt .n{font-size:30px;font-weight:700;color:#fff;text-shadow:0 0 16px rgba(34,211,238,.7),0 2px 8px #000}.alt .u{font-size:10px;color:var(--c1);letter-spacing:2px}
+  .fair{position:absolute;left:16px;bottom:150px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.6);text-shadow:0 1px 4px #000}.fair b{color:var(--c1)}.fair .ok{color:var(--green)}
+  .dock{pointer-events:none;padding:0 12px 14px;display:flex;flex-direction:column;gap:8px;align-items:center}
+  .count{width:min(680px,94%);height:5px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+  .count>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--gold),#ff9f1c);transition:width .1s linear}
+  .panel{pointer-events:auto;width:min(680px,94%);background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:20px;padding:12px;display:grid;grid-template-columns:1fr 1.25fr;gap:10px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+  .stake{display:flex;flex-direction:column;gap:8px}
+  .field{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:8px 12px}
+  .field label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block}
+  .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none;min-width:0}
+  .chips{display:flex;gap:6px}
+  .chip2{flex:1;font-family:var(--mono);font-size:12px;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;padding:7px 0;cursor:pointer;text-align:center;transition:.1s}
+  .chip2:hover{color:#fff;border-color:var(--c1)}
+  .autobox{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:6px 10px}
+  .autobox label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .autobox input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:15px;width:100%;outline:none;min-width:0}
+  .action{display:flex;flex-direction:column;gap:8px;justify-content:center}
+  button.b{border:none;border-radius:16px;cursor:pointer;font-family:var(--display);font-weight:700;transition:.1s;color:#08131f;line-height:1.1}
+  button.b:active{transform:scale(.985)} button.b:disabled{opacity:.38;cursor:not-allowed}
+  .bet{background:linear-gradient(135deg,var(--c1),var(--c2));font-size:20px;min-height:56px}
+  .cash{background:linear-gradient(135deg,var(--gold),var(--green));color:#052113;font-size:16px;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .cash b{font-family:var(--mono);font-size:20px}.cash span{font-size:11px;opacity:.85;font-family:var(--mono);letter-spacing:1px}
+  @media(max-width:560px){ .panel{grid-template-columns:1fr} .hist{max-width:100%} .big{font-size:22vw} }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div class="flash" id="flash"></div>
+  <div class="vig"></div>
+  <div class="hud">
+    <div class="top"><div class="brand"><div class="logo">▲ ZENITH</div><div class="chip" id="state">connecting…</div></div><div class="bal"><div class="v"><span id="bal">—</span></div><div class="u">CREDITS</div></div></div>
+    <div class="hist" id="hist"></div>
+    <div class="center"><div class="big" id="big">1.00×</div><div class="sub" id="sub">next climb starting…</div></div>
+    <div class="alt"><div class="n" id="alt">0</div><div class="u">ALTITUDE</div></div>
+    <div class="fair" id="fair">provably fair · shared round</div>
+    <div class="dock">
+      <div class="count"><i id="countbar"></i></div>
+      <div class="panel">
+        <div class="stake">
+          <div class="field"><div style="flex:1"><label>bet</label><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"></div></div>
+          <div class="chips"><button class="chip2" data-chip="10">+10</button><button class="chip2" data-chip="50">+50</button><button class="chip2" data-chip="half">½</button><button class="chip2" data-chip="dbl">2×</button></div>
+          <div class="autobox"><label>auto&nbsp;×</label><input id="auto" type="number" value="2.00" min="1.01" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="action">
+          <button class="b bet" id="btnBet" disabled>Send the climber ▲</button>
+          <button class="b cash" id="btnCash" disabled><b id="cashamt">Cash out</b><span id="cashsub">tap to secure</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+const $=(id)=>document.getElementById(id);
+
+/* ===== scene: vertical neon ascent ===== */
+const canvas=$("c");
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0x05060f);
+scene.fog=new THREE.Fog(0x070a1a, 34, 150);
+const camera=new THREE.PerspectiveCamera(64, innerWidth/innerHeight, 0.1, 500);
+camera.position.set(0,-2,17); camera.lookAt(0,6,0);
+scene.add(new THREE.AmbientLight(0x6677bb,0.8));
+const key=new THREE.DirectionalLight(0x9fc4ff,0.6); key.position.set(-6,10,8); scene.add(key);
+
+// stars (two parallax layers)
+function starLayer(n,spread,size,color){ const g=new THREE.BufferGeometry(); const p=new Float32Array(n*3);
+  for(let i=0;i<n;i++){ p[i*3]=(Math.random()-.5)*spread; p[i*3+1]=(Math.random()-.5)*spread*1.6; p[i*3+2]=-20-Math.random()*60; }
+  g.setAttribute("position",new THREE.BufferAttribute(p,3));
+  return new THREE.Points(g,new THREE.PointsMaterial({color,size,transparent:true,opacity:.9})); }
+const stars1=starLayer(340,180,0.5,0xbfe9ff), stars2=starLayer(180,220,0.9,0xffffff); scene.add(stars1); scene.add(stars2);
+
+// city grid far below (glowing), shrinks as we climb
+const city=new THREE.Group();
+const cmat=new THREE.MeshBasicMaterial({color:0x1b6f8f});
+for(let i=0;i<64;i++){ const h=1+Math.random()*8; const b=new THREE.Mesh(new THREE.BoxGeometry(1.4,h,1.4),cmat.clone());
+  b.material.color.setHSL(0.5+Math.random()*0.25,0.8,0.4+Math.random()*0.2);
+  b.position.set((Math.random()-.5)*70,-38+h/2,-10-Math.random()*50); city.add(b); }
+scene.add(city);
+
+// the spire: central cable + recycling glowing ring-gates
+const RINGS=16, SEG=7;              // world-units between rings
+const ringMat=new THREE.MeshBasicMaterial({color:0x22d3ee});
+const rings=[];
+for(let i=0;i<RINGS;i++){ const t=new THREE.Mesh(new THREE.TorusGeometry(2.6,0.08,10,40),ringMat.clone());
+  t.userData.idx=i; scene.add(t); rings.push(t); }
+const cable=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,400,8),new THREE.MeshBasicMaterial({color:0x2a3352})); cable.position.y=100; scene.add(cable);
+
+// the climber: glowing pod + halo + light + particle trail
+const climber=new THREE.Group();
+const pod=new THREE.Mesh(new THREE.CapsuleGeometry(0.5,0.9,8,16),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0x22d3ee,emissiveIntensity:1.6,roughness:.3,metalness:.4}));
+climber.add(pod);
+const halo=new THREE.Mesh(new THREE.TorusGeometry(0.95,0.06,8,28),new THREE.MeshBasicMaterial({color:0x8b3fff})); halo.rotation.x=Math.PI/2; climber.add(halo);
+const glow=new THREE.PointLight(0x33e6ff,3.2,22); climber.add(glow);
+climber.position.set(0,4,0); scene.add(climber);
+// trail
+const TN=26; const trailGeo=new THREE.BufferGeometry(); const trailPos=new Float32Array(TN*3);
+const trail=new THREE.Points(trailGeo,new THREE.PointsMaterial({color:0x33e6ff,size:0.5,transparent:true,opacity:.6,depthWrite:false}));
+trailGeo.setAttribute("position",new THREE.BufferAttribute(trailPos,3)); scene.add(trail);
+const trailHist=[];
+
+/* bloom */
+const composer=new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene,camera));
+const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),1.0,0.55,0.6); composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+let worldY=0, targetWorldY=0, phase="idle", climberScreenY=4, fallV=0, shake=0, spin=0;
+const clock=new THREE.Clock();
+function resize(){ renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+addEventListener("resize",resize); resize();
+
+const multToWorld=(m)=>Math.log2(Math.max(1,m))*SEG*2.0;   // altitude from multiplier
+
+function frame(){ requestAnimationFrame(frame);
+  const dt=Math.min(clock.getDelta(),0.05), t=performance.now()/1000;
+  worldY += (targetWorldY-worldY)*Math.min(1,dt*4);
+  // rings recycle downward relative to climb
+  for(const r of rings){ let y=r.userData.idx*SEG - worldY;
+    while(y < -14){ r.userData.idx += RINGS; y=r.userData.idx*SEG - worldY; }
+    while(y > (RINGS*SEG-14)){ r.userData.idx -= RINGS; y=r.userData.idx*SEG - worldY; }
+    r.position.set(0, y - worldYToScreen(), -1); r.rotation.z=t*0.2+r.userData.idx;
+    const d=Math.abs(r.position.y-climberScreenY); r.material.color.setHSL(0.52, .9, d<2?0.7:0.42); }
+  city.position.y = -worldY*0.12; city.scale.setScalar(Math.max(0.15,1-worldY*0.006));
+  stars1.position.y=-worldY*0.05; stars2.position.y=-worldY*0.09;
+  // climber
+  if(phase==="fall"){ fallV+=dt*40; climberScreenY-=fallV*dt; spin+=dt*10; pod.rotation.z=spin; climber.position.x=Math.sin(t*20)*0.3; }
+  else { climberScreenY += (4 - climberScreenY)*0.1; pod.rotation.z=0; climber.position.x=Math.sin(t*1.5)*0.15; }
+  climber.position.y=climberScreenY;
+  halo.rotation.z=t*2; halo.scale.setScalar(1+Math.sin(t*6)*0.06);
+  glow.intensity=2.6+Math.sin(t*8)*0.5;
+  // trail
+  trailHist.unshift([climber.position.x,climber.position.y,0]); if(trailHist.length>TN)trailHist.pop();
+  for(let i=0;i<trailHist.length;i++){ trailPos[i*3]=trailHist[i][0]; trailPos[i*3+1]=trailHist[i][1]-i*0.14; trailPos[i*3+2]=0; }
+  trailGeo.attributes.position.needsUpdate=true; trail.material.opacity = phase==="fall"?0.2:0.6;
+  // camera follow + shake
+  let camY=climberScreenY-6; if(shake>0){ camY+=(Math.random()-.5)*shake; camera.position.x=(Math.random()-.5)*shake; shake*=0.9; if(shake<0.01)shake=0; } else camera.position.x+=(0-camera.position.x)*0.1;
+  camera.position.y += (camY-camera.position.y)*0.12; camera.lookAt(0, climberScreenY+2, 0);
+  composer.render();
+}
+function worldYToScreen(){ return 0; }
+frame();
+const setAlt=(m)=>{ $("alt").textContent=Math.round(multToWorld(m)*12); };
+
+/* ===== RGS (shared-round crash engine · gameId zenith) ===== */
+const RGS=new URLSearchParams(location.search).get("rgs")||`${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws`;
+const GAME=new URLSearchParams(location.search).get("game")||"zenith";
+const MINOR=100; const fmt=(m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const randHex=(n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
+let ws,gphase="connecting",myBet=null,placing=false,hist=[],tOpen=0,betMs=6000,curMult=1;
+function stateChip(t,c){ const el=$("state"); el.textContent=t; el.className="chip"+(c?" "+c:""); }
+function buttons(){ $("btnBet").disabled=!(gphase==="betting"&&!myBet&&!placing);
+  $("btnCash").disabled=!(gphase==="running"&&myBet&&!myBet.cashed);
+  $("bet").disabled=!(gphase==="betting"&&!myBet); $("auto").disabled=!(gphase==="betting"&&!myBet); }
+const curStake=()=>Math.round(parseFloat($("bet").value||"0")*MINOR);
+const autoVal=()=>{const v=parseFloat($("auto").value||"0");return v>=1.01?v:undefined;};
+function flash(c){ const f=$("flash"); f.style.background=c; f.style.opacity=".5"; setTimeout(()=>f.style.opacity="0",130); }
+function renderHist(){ $("hist").innerHTML=hist.slice(0,14).map(x=>{const c=x>=10?"mega":x>=2?"hi":x>=1.5?"mid":"";return `<span class="pill ${c}">${x.toFixed(2)}×</span>`;}).join(""); }
+function startCountdown(){ const bar=$("countbar"),t0=performance.now(); (function tick(){ const el=Math.min(1,(performance.now()-t0)/betMs); bar.style.width=(100*(1-el))+"%"; if(el<1&&gphase==="betting")requestAnimationFrame(tick); })(); }
+function setCash(){ if(gphase==="running"&&myBet&&!myBet.cashed){ $("cashamt").textContent=fmt(Math.floor(myBet.stake*curMult)); $("cashsub").textContent="SECURE · "+curMult.toFixed(2)+"×"; } }
+
+function connect(){ ws=new WebSocket(RGS);
+  ws.onopen=()=>ws.send(JSON.stringify({type:"hello",sessionToken:"zenith-"+randHex(3),mode:"demo",gameId:GAME}));
+  ws.onclose=()=>{ stateChip("reconnecting…"); gphase="connecting"; targetWorldY=0; buttons(); setTimeout(()=>{if(gphase==="connecting")connect();},1500); };
+  ws.onerror=()=>stateChip("server unreachable"); ws.onmessage=(ev)=>handle(JSON.parse(ev.data)); }
+function handle(m){ switch(m.type){
+  case "welcome": $("bal").textContent=fmt(m.balance); gphase="between"; stateChip("waiting"); phase="idle"; targetWorldY=0; buttons(); break;
+  case "round_open":
+    myBet=null; placing=false; gphase="betting"; curMult=1; tOpen=performance.now(); phase="idle";
+    worldY=0; targetWorldY=0; climberScreenY=4; fallV=0; spin=0; trailHist.length=0;
+    $("big").className="big"; $("big").style.color=""; $("big").textContent="1.00×"; $("sub").textContent="place your bet — the climb is about to begin"; setAlt(1);
+    $("cashamt").textContent="Cash out"; $("cashsub").textContent="tap to secure";
+    $("fair").innerHTML=`SHARED ROUND · fair commit <b>${m.round.commitment.slice(0,14)}…</b>`;
+    stateChip("place bets","bet"); startCountdown(); buttons(); break;
+  case "bet_accepted": myBet={betId:m.betId,stake:m.stake,cashed:false}; placing=false; $("bal").textContent=fmt(m.balance); $("sub").textContent="you're on the line — hold for launch"; buttons(); break;
+  case "betting_closed": gphase="running"; phase="climb"; betMs=Math.max(2000,performance.now()-tOpen); $("countbar").style.width="0%";
+    $("big").className="big run"; $("sub").textContent=myBet?"CLIMBING — secure before the fall":"climbing · bet on the next round"; stateChip("climbing","live"); buttons(); break;
+  case "tick": curMult=m.multiplier; targetWorldY=multToWorld(m.multiplier); $("big").textContent=m.multiplier.toFixed(2)+"×"; setAlt(m.multiplier); setCash(); break;
+  case "cash_out": if(myBet&&m.betId===myBet.betId)myBet.cashed=true; $("bal").textContent=fmt(m.balance);
+    $("big").className="big"; $("big").style.color="var(--green)"; $("sub").textContent=`secured 🔒 ${m.multiplier.toFixed(2)}× · +${fmt(m.payout)}`;
+    $("cashamt").textContent="+"+fmt(m.payout); $("cashsub").textContent="secured ✓"; flash("rgba(43,255,136,.4)"); buttons(); break;
+  case "jackpot": $("bal").textContent=fmt(m.balance); break;
+  case "crash":{ gphase="between"; phase="fall"; const r=m.round; shake=0.7; fallV=6; flash("rgba(255,50,50,.5)");
+    hist.unshift(r.crashPoint); renderHist();
+    $("big").className="big bust"; $("big").textContent=r.crashPoint.toFixed(2)+"×";
+    $("sub").textContent=(myBet&&!myBet.cashed)?`FELL at ${r.crashPoint.toFixed(2)}× — you dropped`:`fell at ${r.crashPoint.toFixed(2)}×`;
+    $("fair").innerHTML=`revealed <b>${r.serverSeed.slice(0,14)}…</b> · fell <b>${r.crashPoint.toFixed(2)}×</b> · <span class="ok">✓ verifiable</span>`;
+    stateChip("fell","bust"); if(!myBet||myBet.cashed){ $("cashamt").textContent="Cash out"; $("cashsub").textContent="tap to secure"; } myBet=null; buttons(); break; }
+  case "balance": $("bal").textContent=fmt(m.balance); break;
+  case "error": stateChip("⚠ "+m.code); placing=false; buttons(); break; } }
+$("btnBet").onclick=()=>{ const s=curStake(); if(!(s>0))return; placing=true; buttons(); ws.send(JSON.stringify({type:"place_bet",stake:s,autoCashOut:autoVal(),clientEntropy:randHex(16)})); };
+$("btnCash").onclick=()=>{ if(myBet&&!myBet.cashed) ws.send(JSON.stringify({type:"cash_out",betId:myBet.betId})); };
+document.querySelectorAll(".chip2").forEach(b=>b.onclick=()=>{ const c=b.dataset.chip,v=parseFloat($("bet").value||"0"); if(c==="half")$("bet").value=Math.max(1,Math.floor(v/2)); else if(c==="dbl")$("bet").value=Math.max(1,Math.floor(v*2)); else $("bet").value=Math.floor(v+ +c); });
+connect();
+</script>
+</body>
+</html>

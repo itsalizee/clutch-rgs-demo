@@ -60,6 +60,14 @@ export const GAMES: GameDef[] = [
     ux: { turbo: true },
     tuning: { bettingMs: 2500, intermissionMs: 1500, tickMs: 40, growth: 0.34, moonPoolBase: 100_000 },
   },
+  {
+    id: "zenith",
+    name: "Zenith",
+    type: "crash",
+    blurb: "Shared-round vertical climb — one climber, everyone watches, cash out before the fall.",
+    ux: {},
+    tuning: { bettingMs: 6000, intermissionMs: 3500, tickMs: 40, growth: 0.13, moonPoolBase: 200_000 },
+  },
 ];
 
 export function getGame(id: string): GameDef | undefined {
