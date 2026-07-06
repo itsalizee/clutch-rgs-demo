@@ -24,6 +24,9 @@
   .chip.live{color:#04150c;background:linear-gradient(90deg,var(--green),var(--c1));border-color:transparent}
   .chip.bet{color:#1a0f02;background:linear-gradient(90deg,var(--gold),#ff9f1c);border-color:transparent}
   .chip.bust{color:#fff;background:var(--rug);border-color:transparent}
+  .topright{display:flex;align-items:center;gap:10px}
+  .mute{pointer-events:auto;cursor:pointer;font-family:var(--mono);font-size:15px;color:var(--muted);background:var(--glass);border:1px solid var(--line);border-radius:10px;width:34px;height:30px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+  .mute:hover{color:#fff}
   .bal{text-align:right;font-family:var(--mono)} .bal .v{font-size:20px;color:#fff;text-shadow:0 2px 10px #000}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
   .hist{display:flex;gap:6px;padding:8px 16px 0;flex-wrap:wrap;max-width:74%}
   .pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted)}
@@ -31,6 +34,8 @@
   .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:-6vh;pointer-events:none}
   .big{font-weight:700;font-size:14vw;line-height:.9;color:var(--gold);text-shadow:0 0 42px currentColor,0 6px 20px #000;transition:color .12s;letter-spacing:-.02em}
   .big.run{color:#fff}.big.bust{color:var(--rug)}
+  .big.pop{animation:pop .28s ease-out}
+  @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.13)}100%{transform:scale(1)}}
   .sub{font-family:var(--mono);font-size:13px;color:#dfe7f5;text-shadow:0 2px 8px #000;margin-top:4px;letter-spacing:.4px}
   .alt{position:absolute;right:20px;top:44%;text-align:center;font-family:var(--mono)}
   .alt .n{font-size:30px;font-weight:700;color:#fff;text-shadow:0 0 16px rgba(34,211,238,.7),0 2px 8px #000}.alt .u{font-size:10px;color:var(--c1);letter-spacing:2px}
@@ -64,7 +69,10 @@
   <div class="flash" id="flash"></div>
   <div class="vig"></div>
   <div class="hud">
-    <div class="top"><div class="brand"><div class="logo">▲ ZENITH</div><div class="chip" id="state">connecting…</div></div><div class="bal"><div class="v"><span id="bal">—</span></div><div class="u">CREDITS</div></div></div>
+    <div class="top">
+      <div class="brand"><div class="logo">▲ ZENITH</div><div class="chip" id="state">connecting…</div></div>
+      <div class="topright"><div class="mute" id="mute" title="sound">🔊</div><div class="bal"><div class="v"><span id="bal">—</span></div><div class="u">CREDITS</div></div></div>
+    </div>
     <div class="hist" id="hist"></div>
     <div class="center"><div class="big" id="big">1.00×</div><div class="sub" id="sub">next climb starting…</div></div>
     <div class="alt"><div class="n" id="alt">0</div><div class="u">ALTITUDE</div></div>
@@ -109,41 +117,55 @@ camera.position.set(0,-2,17); camera.lookAt(0,6,0);
 scene.add(new THREE.AmbientLight(0x6677bb,0.8));
 const key=new THREE.DirectionalLight(0x9fc4ff,0.6); key.position.set(-6,10,8); scene.add(key);
 
-// stars (two parallax layers)
 function starLayer(n,spread,size,color){ const g=new THREE.BufferGeometry(); const p=new Float32Array(n*3);
   for(let i=0;i<n;i++){ p[i*3]=(Math.random()-.5)*spread; p[i*3+1]=(Math.random()-.5)*spread*1.6; p[i*3+2]=-20-Math.random()*60; }
   g.setAttribute("position",new THREE.BufferAttribute(p,3));
   return new THREE.Points(g,new THREE.PointsMaterial({color,size,transparent:true,opacity:.9})); }
 const stars1=starLayer(340,180,0.5,0xbfe9ff), stars2=starLayer(180,220,0.9,0xffffff); scene.add(stars1); scene.add(stars2);
 
-// city grid far below (glowing), shrinks as we climb
+// city grid far below, shrinks as we climb
 const city=new THREE.Group();
-const cmat=new THREE.MeshBasicMaterial({color:0x1b6f8f});
-for(let i=0;i<64;i++){ const h=1+Math.random()*8; const b=new THREE.Mesh(new THREE.BoxGeometry(1.4,h,1.4),cmat.clone());
+for(let i=0;i<64;i++){ const h=1+Math.random()*8; const b=new THREE.Mesh(new THREE.BoxGeometry(1.4,h,1.4),new THREE.MeshBasicMaterial());
   b.material.color.setHSL(0.5+Math.random()*0.25,0.8,0.4+Math.random()*0.2);
   b.position.set((Math.random()-.5)*70,-38+h/2,-10-Math.random()*50); city.add(b); }
 scene.add(city);
 
-// the spire: central cable + recycling glowing ring-gates
-const RINGS=16, SEG=7;              // world-units between rings
-const ringMat=new THREE.MeshBasicMaterial({color:0x22d3ee});
+// spire: cable + recycling ring-gates
+const RINGS=16, SEG=7;
 const rings=[];
-for(let i=0;i<RINGS;i++){ const t=new THREE.Mesh(new THREE.TorusGeometry(2.6,0.08,10,40),ringMat.clone());
+for(let i=0;i<RINGS;i++){ const t=new THREE.Mesh(new THREE.TorusGeometry(2.6,0.08,10,40),new THREE.MeshBasicMaterial({color:0x22d3ee}));
   t.userData.idx=i; scene.add(t); rings.push(t); }
 const cable=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,400,8),new THREE.MeshBasicMaterial({color:0x2a3352})); cable.position.y=100; scene.add(cable);
 
-// the climber: glowing pod + halo + light + particle trail
+// ===== the climber: a stylized astronaut =====
 const climber=new THREE.Group();
-const pod=new THREE.Mesh(new THREE.CapsuleGeometry(0.5,0.9,8,16),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0x22d3ee,emissiveIntensity:1.6,roughness:.3,metalness:.4}));
-climber.add(pod);
-const halo=new THREE.Mesh(new THREE.TorusGeometry(0.95,0.06,8,28),new THREE.MeshBasicMaterial({color:0x8b3fff})); halo.rotation.x=Math.PI/2; climber.add(halo);
+const suitMat=new THREE.MeshStandardMaterial({color:0xeef4ff,emissive:0x0b1a34,emissiveIntensity:.6,roughness:.45,metalness:.35});
+const pod=new THREE.Mesh(new THREE.CapsuleGeometry(0.4,0.62,8,16),suitMat); pod.position.y=0.06; climber.add(pod); // body (keep name 'pod' for frame loop)
+const helmet=new THREE.Mesh(new THREE.SphereGeometry(0.4,22,22),new THREE.MeshStandardMaterial({color:0x0a0f1e,emissive:0x22d3ee,emissiveIntensity:.5,roughness:.05,metalness:.95})); helmet.position.y=0.6; climber.add(helmet);
+const visor=new THREE.Mesh(new THREE.SphereGeometry(0.29,18,12),new THREE.MeshBasicMaterial({color:0x33e6ff})); visor.position.set(0,0.6,0.2); visor.scale.set(1,0.7,0.5); climber.add(visor);
+for(const s of [-1,1]){ const arm=new THREE.Mesh(new THREE.CapsuleGeometry(0.12,0.42,4,8),suitMat); arm.position.set(s*0.46,0.08,0); arm.rotation.z=s*0.55; climber.add(arm);
+  const leg=new THREE.Mesh(new THREE.CapsuleGeometry(0.13,0.5,4,8),suitMat); leg.position.set(s*0.19,-0.62,0); climber.add(leg); }
+const pack=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.28),new THREE.MeshStandardMaterial({color:0x1a2438,emissive:0x8b3fff,emissiveIntensity:.35,roughness:.5})); pack.position.set(0,0.14,-0.34); climber.add(pack);
+const halo=new THREE.Mesh(new THREE.TorusGeometry(0.98,0.05,8,28),new THREE.MeshBasicMaterial({color:0x8b3fff})); halo.rotation.x=Math.PI/2; halo.position.y=-0.25; climber.add(halo);
 const glow=new THREE.PointLight(0x33e6ff,3.2,22); climber.add(glow);
+const flame=new THREE.Mesh(new THREE.ConeGeometry(0.3,1.5,14),new THREE.MeshBasicMaterial({color:0xff8a3c,transparent:true,opacity:.9})); flame.position.set(0,-1.15,-0.05); flame.rotation.x=Math.PI; climber.add(flame);
+const flameCore=new THREE.Mesh(new THREE.ConeGeometry(0.15,0.95,14),new THREE.MeshBasicMaterial({color:0x66f0ff,transparent:true,opacity:.95})); flameCore.position.set(0,-0.95,-0.05); flameCore.rotation.x=Math.PI; climber.add(flameCore);
 climber.position.set(0,4,0); scene.add(climber);
+
 // trail
-const TN=26; const trailGeo=new THREE.BufferGeometry(); const trailPos=new Float32Array(TN*3);
-const trail=new THREE.Points(trailGeo,new THREE.PointsMaterial({color:0x33e6ff,size:0.5,transparent:true,opacity:.6,depthWrite:false}));
+const TN=32; const trailGeo=new THREE.BufferGeometry(); const trailPos=new Float32Array(TN*3);
+const trail=new THREE.Points(trailGeo,new THREE.PointsMaterial({color:0x33e6ff,size:0.55,transparent:true,opacity:.6,depthWrite:false}));
 trailGeo.setAttribute("position",new THREE.BufferAttribute(trailPos,3)); scene.add(trail);
 const trailHist=[];
+
+// warp speed-streaks (appear at high climb speed)
+const streaks=[];
+for(let i=0;i<12;i++){ const m=new THREE.Mesh(new THREE.PlaneGeometry(0.05,3),new THREE.MeshBasicMaterial({color:0x9fe9ff,transparent:true,opacity:0}));
+  m.position.set((Math.random()-.5)*16,(Math.random()-.5)*20,-4-Math.random()*6); scene.add(m); streaks.push(m); }
+
+// cash shockwave ring (animated on cash-out)
+const shock=new THREE.Mesh(new THREE.TorusGeometry(1,0.06,10,40),new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:0})); shock.rotation.x=Math.PI/2; scene.add(shock);
+let shockT=0;
 
 /* bloom */
 const composer=new EffectComposer(renderer);
@@ -151,42 +173,82 @@ composer.addPass(new RenderPass(scene,camera));
 const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),1.0,0.55,0.6); composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
-let worldY=0, targetWorldY=0, phase="idle", climberScreenY=4, fallV=0, shake=0, spin=0;
+let worldY=0, targetWorldY=0, phase="idle", climberScreenY=4, fallV=0, shake=0, spin=0, passCount=0;
 const clock=new THREE.Clock();
 function resize(){ renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); }
 addEventListener("resize",resize); resize();
+const multToWorld=(m)=>Math.log2(Math.max(1,m))*SEG*2.0;
 
-const multToWorld=(m)=>Math.log2(Math.max(1,m))*SEG*2.0;   // altitude from multiplier
+function numberPop(){ const b=$("big"); b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }
+function onRingPass(){ if(phase!=="climb")return; Snd.ring(); numberPop(); shock.position.set(0,climberScreenY,0); shockT=0.0001; shock.material.color.set(0x22d3ee); }
 
 function frame(){ requestAnimationFrame(frame);
   const dt=Math.min(clock.getDelta(),0.05), t=performance.now()/1000;
+  const climbing = phase==="climb";
+  const climbSpeed = Math.max(0, targetWorldY-worldY);
   worldY += (targetWorldY-worldY)*Math.min(1,dt*4);
-  // rings recycle downward relative to climb
+  // ring-pass beats
+  const pc = Math.floor(worldY/SEG);
+  if(pc>passCount){ passCount=pc; onRingPass(); } else if(pc<passCount){ passCount=pc; }
+  // rings recycle
   for(const r of rings){ let y=r.userData.idx*SEG - worldY;
     while(y < -14){ r.userData.idx += RINGS; y=r.userData.idx*SEG - worldY; }
     while(y > (RINGS*SEG-14)){ r.userData.idx -= RINGS; y=r.userData.idx*SEG - worldY; }
-    r.position.set(0, y - worldYToScreen(), -1); r.rotation.z=t*0.2+r.userData.idx;
-    const d=Math.abs(r.position.y-climberScreenY); r.material.color.setHSL(0.52, .9, d<2?0.7:0.42); }
+    r.position.set(0, y, -1); r.rotation.z=t*0.2+r.userData.idx;
+    const d=Math.abs(r.position.y-climberScreenY); r.material.color.setHSL(0.52, .9, d<1.6?0.75:0.42); }
   city.position.y = -worldY*0.12; city.scale.setScalar(Math.max(0.15,1-worldY*0.006));
   stars1.position.y=-worldY*0.05; stars2.position.y=-worldY*0.09;
   // climber
-  if(phase==="fall"){ fallV+=dt*40; climberScreenY-=fallV*dt; spin+=dt*10; pod.rotation.z=spin; climber.position.x=Math.sin(t*20)*0.3; }
-  else { climberScreenY += (4 - climberScreenY)*0.1; pod.rotation.z=0; climber.position.x=Math.sin(t*1.5)*0.15; }
+  if(phase==="fall"){ fallV+=dt*40; climberScreenY-=fallV*dt; spin+=dt*10; pod.rotation.z=spin; climber.rotation.z=spin*0.5; climber.position.x=Math.sin(t*20)*0.3; }
+  else { climberScreenY += (4 - climberScreenY)*0.1; climber.rotation.z += (0-climber.rotation.z)*0.2; climber.position.x=Math.sin(t*1.5)*0.15; }
   climber.position.y=climberScreenY;
-  halo.rotation.z=t*2; halo.scale.setScalar(1+Math.sin(t*6)*0.06);
+  halo.rotation.z=t*2.2; halo.scale.setScalar(1+Math.sin(t*6)*0.06);
   glow.intensity=2.6+Math.sin(t*8)*0.5;
+  // thruster flame (flicker + scale with climb)
+  const fb = phase==="fall" ? 0 : (0.6 + Math.min(1.6, climbSpeed*0.5));
+  const fl = fb*(0.85+Math.sin(t*40)*0.2);
+  flame.scale.set(1,Math.max(0.2,fl),1); flame.material.opacity=climbing?0.9:0.5;
+  flameCore.scale.set(1,Math.max(0.2,fl*0.9),1); flameCore.material.opacity=climbing?0.95:0.55;
   // trail
   trailHist.unshift([climber.position.x,climber.position.y,0]); if(trailHist.length>TN)trailHist.pop();
-  for(let i=0;i<trailHist.length;i++){ trailPos[i*3]=trailHist[i][0]; trailPos[i*3+1]=trailHist[i][1]-i*0.14; trailPos[i*3+2]=0; }
-  trailGeo.attributes.position.needsUpdate=true; trail.material.opacity = phase==="fall"?0.2:0.6;
-  // camera follow + shake
+  for(let i=0;i<trailHist.length;i++){ trailPos[i*3]=trailHist[i][0]+(Math.random()-.5)*0.04; trailPos[i*3+1]=trailHist[i][1]-i*0.16; trailPos[i*3+2]=0; }
+  trailGeo.attributes.position.needsUpdate=true; trail.material.opacity = phase==="fall"?0.25:0.6;
+  trail.material.color.set(phase==="fall"?0xff5a5a:0x33e6ff);
+  // warp streaks
+  const warp=Math.min(1,climbSpeed*0.9);
+  for(const m of streaks){ m.position.y -= (6+climbSpeed*20)*dt; m.material.opacity=climbing?warp*0.5:0;
+    m.scale.y=1+climbSpeed*3; if(m.position.y<-12){ m.position.y=12+Math.random()*6; m.position.x=(Math.random()-.5)*16; } }
+  // shockwave
+  if(shockT>0){ shockT+=dt; const p=Math.min(1,shockT/0.5); shock.scale.setScalar(0.3+p*5); shock.material.opacity=(1-p)*0.7; if(p>=1)shockT=0; }
+  // camera
   let camY=climberScreenY-6; if(shake>0){ camY+=(Math.random()-.5)*shake; camera.position.x=(Math.random()-.5)*shake; shake*=0.9; if(shake<0.01)shake=0; } else camera.position.x+=(0-camera.position.x)*0.1;
-  camera.position.y += (camY-camera.position.y)*0.12; camera.lookAt(0, climberScreenY+2, 0);
+  camera.position.y += (camY-camera.position.y)*0.12;
+  camera.fov += ((64+Math.min(10,climbSpeed*6))-camera.fov)*0.08; camera.updateProjectionMatrix();
+  camera.lookAt(0, climberScreenY+2, 0);
   composer.render();
 }
-function worldYToScreen(){ return 0; }
 frame();
 const setAlt=(m)=>{ $("alt").textContent=Math.round(multToWorld(m)*12); };
+
+/* ===== sound (WebAudio, synth — no assets; inits on first gesture) ===== */
+const Snd=(()=>{ let ctx,master,drone,droneGain,muted=false;
+  function ensure(){ if(ctx)return; try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.gain.value=muted?0:0.45; master.connect(ctx.destination); }catch(e){} }
+  function blip(freq,dur,type,vol){ if(!ctx)return; const o=ctx.createOscillator(),g=ctx.createGain(); o.type=type||"sine"; o.frequency.value=freq; o.connect(g); g.connect(master);
+    const t=ctx.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol||0.25,t+0.01); g.gain.exponentialRampToValueAtTime(0.0008,t+dur); o.start(t); o.stop(t+dur+0.03); }
+  return {
+    ensure,
+    bet(){ ensure(); blip(430,0.12,"triangle",0.22); },
+    ring(){ if(ctx) blip(760+Math.random()*120,0.05,"sine",0.10); },
+    climbStart(){ ensure(); if(!ctx||drone)return; drone=ctx.createOscillator(); droneGain=ctx.createGain(); drone.type="sawtooth"; drone.frequency.value=95; droneGain.gain.value=0; drone.connect(droneGain); droneGain.connect(master); drone.start(); droneGain.gain.linearRampToValueAtTime(0.10,ctx.currentTime+0.3); },
+    climbPitch(m){ if(drone) drone.frequency.setTargetAtTime(85+Math.min(720,Math.log2(Math.max(1,m))*130),ctx.currentTime,0.12); },
+    climbStop(){ if(drone){ const d=drone,g=droneGain; g.gain.setTargetAtTime(0,ctx.currentTime,0.12); d.stop(ctx.currentTime+0.5); drone=null; droneGain=null; } },
+    cash(){ ensure(); [660,880,1320].forEach((f,i)=>setTimeout(()=>blip(f,0.2,"triangle",0.2),i*80)); },
+    fall(){ ensure(); if(!ctx)return; const o=ctx.createOscillator(),g=ctx.createGain(); o.type="sawtooth"; const t=ctx.currentTime; o.frequency.setValueAtTime(420,t); o.frequency.exponentialRampToValueAtTime(55,t+0.65); g.gain.setValueAtTime(0.28,t); g.gain.exponentialRampToValueAtTime(0.0008,t+0.7); o.connect(g); g.connect(master); o.start(t); o.stop(t+0.72); },
+    setMuted(v){ muted=v; if(master&&ctx) master.gain.setTargetAtTime(v?0:0.45,ctx.currentTime,0.05); }
+  };
+})();
+let muted=false;
+$("mute").onclick=()=>{ muted=!muted; Snd.ensure(); Snd.setMuted(muted); $("mute").textContent=muted?"🔇":"🔊"; };
 
 /* ===== RGS (shared-round crash engine · gameId zenith) ===== */
 const RGS=new URLSearchParams(location.search).get("rgs")||`${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws`;
@@ -213,29 +275,30 @@ function handle(m){ switch(m.type){
   case "welcome": $("bal").textContent=fmt(m.balance); gphase="between"; stateChip("waiting"); phase="idle"; targetWorldY=0; buttons(); break;
   case "round_open":
     myBet=null; placing=false; gphase="betting"; curMult=1; tOpen=performance.now(); phase="idle";
-    worldY=0; targetWorldY=0; climberScreenY=4; fallV=0; spin=0; trailHist.length=0;
+    worldY=0; targetWorldY=0; climberScreenY=4; fallV=0; spin=0; passCount=0; trailHist.length=0;
     $("big").className="big"; $("big").style.color=""; $("big").textContent="1.00×"; $("sub").textContent="place your bet — the climb is about to begin"; setAlt(1);
     $("cashamt").textContent="Cash out"; $("cashsub").textContent="tap to secure";
     $("fair").innerHTML=`SHARED ROUND · fair commit <b>${m.round.commitment.slice(0,14)}…</b>`;
     stateChip("place bets","bet"); startCountdown(); buttons(); break;
   case "bet_accepted": myBet={betId:m.betId,stake:m.stake,cashed:false}; placing=false; $("bal").textContent=fmt(m.balance); $("sub").textContent="you're on the line — hold for launch"; buttons(); break;
   case "betting_closed": gphase="running"; phase="climb"; betMs=Math.max(2000,performance.now()-tOpen); $("countbar").style.width="0%";
-    $("big").className="big run"; $("sub").textContent=myBet?"CLIMBING — secure before the fall":"climbing · bet on the next round"; stateChip("climbing","live"); buttons(); break;
-  case "tick": curMult=m.multiplier; targetWorldY=multToWorld(m.multiplier); $("big").textContent=m.multiplier.toFixed(2)+"×"; setAlt(m.multiplier); setCash(); break;
+    Snd.climbStart(); $("big").className="big run"; $("sub").textContent=myBet?"CLIMBING — secure before the fall":"climbing · bet on the next round"; stateChip("climbing","live"); buttons(); break;
+  case "tick": curMult=m.multiplier; targetWorldY=multToWorld(m.multiplier); $("big").textContent=m.multiplier.toFixed(2)+"×"; setAlt(m.multiplier); setCash(); Snd.climbPitch(m.multiplier); break;
   case "cash_out": if(myBet&&m.betId===myBet.betId)myBet.cashed=true; $("bal").textContent=fmt(m.balance);
     $("big").className="big"; $("big").style.color="var(--green)"; $("sub").textContent=`secured 🔒 ${m.multiplier.toFixed(2)}× · +${fmt(m.payout)}`;
-    $("cashamt").textContent="+"+fmt(m.payout); $("cashsub").textContent="secured ✓"; flash("rgba(43,255,136,.4)"); buttons(); break;
+    $("cashamt").textContent="+"+fmt(m.payout); $("cashsub").textContent="secured ✓"; flash("rgba(43,255,136,.4)");
+    Snd.climbStop(); Snd.cash(); shock.position.set(0,climberScreenY,0); shock.material.color.set(0xffd23f); shockT=0.0001; buttons(); break;
   case "jackpot": $("bal").textContent=fmt(m.balance); break;
   case "crash":{ gphase="between"; phase="fall"; const r=m.round; shake=0.7; fallV=6; flash("rgba(255,50,50,.5)");
-    hist.unshift(r.crashPoint); renderHist();
+    hist.unshift(r.crashPoint); renderHist(); Snd.climbStop(); Snd.fall();
     $("big").className="big bust"; $("big").textContent=r.crashPoint.toFixed(2)+"×";
     $("sub").textContent=(myBet&&!myBet.cashed)?`FELL at ${r.crashPoint.toFixed(2)}× — you dropped`:`fell at ${r.crashPoint.toFixed(2)}×`;
     $("fair").innerHTML=`revealed <b>${r.serverSeed.slice(0,14)}…</b> · fell <b>${r.crashPoint.toFixed(2)}×</b> · <span class="ok">✓ verifiable</span>`;
     stateChip("fell","bust"); if(!myBet||myBet.cashed){ $("cashamt").textContent="Cash out"; $("cashsub").textContent="tap to secure"; } myBet=null; buttons(); break; }
   case "balance": $("bal").textContent=fmt(m.balance); break;
   case "error": stateChip("⚠ "+m.code); placing=false; buttons(); break; } }
-$("btnBet").onclick=()=>{ const s=curStake(); if(!(s>0))return; placing=true; buttons(); ws.send(JSON.stringify({type:"place_bet",stake:s,autoCashOut:autoVal(),clientEntropy:randHex(16)})); };
-$("btnCash").onclick=()=>{ if(myBet&&!myBet.cashed) ws.send(JSON.stringify({type:"cash_out",betId:myBet.betId})); };
+$("btnBet").onclick=()=>{ const s=curStake(); if(!(s>0))return; Snd.bet(); placing=true; buttons(); ws.send(JSON.stringify({type:"place_bet",stake:s,autoCashOut:autoVal(),clientEntropy:randHex(16)})); };
+$("btnCash").onclick=()=>{ Snd.ensure(); if(myBet&&!myBet.cashed) ws.send(JSON.stringify({type:"cash_out",betId:myBet.betId})); };
 document.querySelectorAll(".chip2").forEach(b=>b.onclick=()=>{ const c=b.dataset.chip,v=parseFloat($("bet").value||"0"); if(c==="half")$("bet").value=Math.max(1,Math.floor(v/2)); else if(c==="dbl")$("bet").value=Math.max(1,Math.floor(v*2)); else $("bet").value=Math.floor(v+ +c); });
 connect();
 </script>
