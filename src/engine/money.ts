@@ -21,7 +21,9 @@ export function isMinor(n: number): n is Minor {
  * rounding that ever happens to money; it is deterministic and logged.
  */
 export function payoutFor(stake: Minor, multiplier: number): Minor {
-  if (!(multiplier >= 1)) throw new RangeError(`multiplier must be >= 1; got ${multiplier}`);
+  // >= 0: most games only pay on wins (multiplier >= 1), but Plinko has legitimate
+  // sub-1 bins (a partial-loss outcome returns less than the stake).
+  if (!(multiplier >= 0)) throw new RangeError(`multiplier must be >= 0; got ${multiplier}`);
   return minor(Math.floor(stake * multiplier));
 }
 
