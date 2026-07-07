@@ -8,3 +8,4 @@ export * from "./entropy";
 export * from "./external-entropy";
 export * from "./stepcross";
 export * from "./mines";
+export * from "./plinko";
