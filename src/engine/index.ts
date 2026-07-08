@@ -9,3 +9,6 @@ export * from "./external-entropy";
 export * from "./stepcross";
 export * from "./mines";
 export * from "./plinko";
+export * from "./dice";
+export * from "./limbo";
+export * from "./wheel";

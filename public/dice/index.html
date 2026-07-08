@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Dice — provably-fair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{ --c1:#22D3EE;--c2:#8B3FFF;--gold:#FFD23F;--green:#2BFF88;--rug:#FF3653;--text:#f4f7ff;--muted:#93a0ba;--glass:rgba(12,15,26,.66);--line:rgba(255,255,255,.12);--display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:var(--display);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;touch-action:manipulation;
+    background:radial-gradient(circle at 14% 8%,rgba(34,211,238,.16),transparent 45%),radial-gradient(circle at 86% 4%,rgba(139,63,255,.16),transparent 45%),#05060f}
+  .app{max-width:640px;margin:0 auto;padding:16px 16px 20px;display:flex;flex-direction:column;min-height:100vh}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .logo{font-weight:700;font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .chip{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--muted);margin-top:8px;display:inline-block}
+  .topright{display:flex;align-items:center;gap:10px}
+  .mute{cursor:pointer;font-family:var(--mono);font-size:15px;color:var(--muted);background:var(--glass);border:1px solid var(--line);border-radius:10px;width:34px;height:30px;display:flex;align-items:center;justify-content:center}
+  .bal{text-align:right;font-family:var(--mono)}.bal .v{font-size:20px;color:#fff}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
+  .stage{flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;padding:10px 4px}
+  .roll{text-align:center}.roll .n{font-weight:700;font-size:15vw;line-height:.9;color:#fff;text-shadow:0 0 40px rgba(34,211,238,.4)}
+  .roll .n.win{color:var(--green);text-shadow:0 0 44px var(--green)} .roll .n.lose{color:var(--rug);text-shadow:0 0 44px var(--rug)}
+  .roll .s{font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:6px}
+  .track{position:relative;height:16px;border-radius:999px;background:linear-gradient(90deg,var(--rug),var(--rug));overflow:visible;margin:0 8px}
+  .track .win{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,var(--green),var(--c1));border-radius:999px}
+  .ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin:7px 8px 0}
+  .track .marker{position:absolute;top:-9px;width:0;height:0}
+  .track .marker i{position:absolute;left:-8px;top:0;width:16px;height:34px;background:#fff;border-radius:5px;box-shadow:0 0 16px #fff;transition:left .5s cubic-bezier(.22,1,.36,1)}
+  input[type=range]{width:100%;margin:8px 0 0;accent-color:#22D3EE}
+  .stats{display:flex;gap:10px}
+  .stat{flex:1;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:10px 12px;text-align:center}
+  .stat .l{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}.stat .v{font-family:var(--mono);font-size:18px;font-weight:700;color:#fff;margin-top:3px}
+  .dock{margin-top:auto;padding-top:14px;display:flex;flex-direction:column;gap:10px}
+  .toggle{display:flex;gap:6px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:4px;align-self:center}
+  .toggle button{font-family:var(--mono);font-size:13px;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:7px 20px;cursor:pointer}
+  .toggle button.on{color:#04150c;background:linear-gradient(90deg,var(--c1),var(--c2));font-weight:700}
+  .betrow{display:grid;grid-template-columns:1fr 1.2fr;gap:10px}
+  .field{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:8px 12px}
+  .field label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none;min-width:0}
+  .chips{display:flex;gap:6px} .chip2{font-family:var(--mono);font-size:12px;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:9px;padding:6px 9px;cursor:pointer}
+  button.go{border:none;border-radius:16px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:20px;color:#04150c;background:linear-gradient(135deg,var(--gold),var(--green));min-height:56px}
+  button.go:disabled{opacity:.4}
+  .fair{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.6);text-align:center;margin-top:8px}.fair b{color:var(--c1)}.fair .ok{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><div><div class="logo">🎲 DICE</div><div class="chip" id="state">connecting…</div></div>
+    <div class="topright"><div class="mute" id="mute">🔊</div><div class="bal"><div class="v"><span id="bal">—</span></div><div class="u">CREDITS</div></div></div></div>
+  <div class="stage">
+    <div class="roll"><div class="n" id="roll">—</div><div class="s" id="sub">roll over your target to win</div></div>
+    <div>
+      <div class="track" id="track"><div class="win" id="win"></div><div class="marker" id="marker" style="display:none"><i></i></div></div>
+      <div class="ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+      <input type="range" id="target" min="2" max="98" value="50" step="1">
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="l">Target</div><div class="v" id="tv">50.00</div></div>
+      <div class="stat"><div class="l">Win chance</div><div class="v" id="wc">—</div></div>
+      <div class="stat"><div class="l">Multiplier</div><div class="v" id="mult">—</div></div>
+    </div>
+  </div>
+  <div class="fair" id="fair">provably fair · one verifiable roll per bet</div>
+  <div class="dock">
+    <div class="toggle"><button id="over" class="on">Roll over</button><button id="under">Roll under</button></div>
+    <div class="betrow">
+      <div class="field"><div style="flex:1"><label>bet</label><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"></div>
+        <div class="chips"><span class="chip2" data-chip="half">½</span><span class="chip2" data-chip="dbl">2×</span></div></div>
+      <button class="go" id="btnRoll" disabled>Roll 🎲</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+const $=(id)=>document.getElementById(id);
+const RGS=new URLSearchParams(location.search).get("rgs")||`${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws/originals`;
+const MINOR=100,fmt=(m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const randHex=(n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
+let ws,ready=false,edge=0.03,dir="over";
+const Snd=(()=>{let c,m,mut=false;function e(){if(c)return;try{c=new(window.AudioContext||window.webkitAudioContext)();m=c.createGain();m.gain.value=mut?0:0.4;m.connect(c.destination);}catch(x){}}
+  function b(f,d,t,v){if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=t||"sine";o.frequency.value=f;o.connect(g);g.connect(m);const n=c.currentTime;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(v||.2,n+.005);g.gain.exponentialRampToValueAtTime(.0006,n+d);o.start(n);o.stop(n+d+.02);}
+  return{e,roll(){e();b(300,.08,"triangle",.15);},win(){e();[600,900,1200].forEach((f,i)=>setTimeout(()=>b(f,.16,"triangle",.2),i*60));},lose(){e();b(160,.16,"sine",.16);},mute(v){mut=v;if(m&&c)m.gain.setTargetAtTime(v?0:.4,c.currentTime,.05);}};})();
+let mut=false;$("mute").onclick=()=>{mut=!mut;Snd.e();Snd.mute(mut);$("mute").textContent=mut?"🔇":"🔊";};
+function tgt(){ return parseFloat($("target").value); }
+function chancePct(){ return dir==="over"?100-tgt():tgt(); }
+function mult(){ const wc=chancePct(); return wc>0&&wc<100?Math.floor((1-edge)*100/wc*100)/100:0; }
+function refresh(){ const t=tgt(); $("tv").textContent=t.toFixed(2); $("wc").textContent=chancePct().toFixed(2)+"%"; $("mult").textContent=mult().toFixed(2)+"×";
+  const w=$("win"); if(dir==="over"){ w.style.left=t+"%"; w.style.right="0"; w.style.width="auto"; } else { w.style.left="0"; w.style.right=(100-t)+"%"; w.style.width="auto"; }
+  $("sub").textContent=`roll ${dir} ${t.toFixed(2)} to win`; }
+$("target").oninput=refresh;
+$("over").onclick=()=>{dir="over";$("over").classList.add("on");$("under").classList.remove("on");refresh();};
+$("under").onclick=()=>{dir="under";$("under").classList.add("on");$("over").classList.remove("on");refresh();};
+function connect(){ ws=new WebSocket(RGS); ws.onopen=()=>ws.send(JSON.stringify({type:"hello",sessionToken:"dice-"+randHex(3),mode:"demo"}));
+  ws.onclose=()=>{$("state").textContent="reconnecting…";ready=false;buttons();setTimeout(()=>{if(!ready)connect();},1500);};
+  ws.onerror=()=>$("state").textContent="server unreachable"; ws.onmessage=(ev)=>handle(JSON.parse(ev.data)); }
+function buttons(){ $("btnRoll").disabled=!ready; }
+function handle(m){ switch(m.type){
+  case "welcome": edge=m.config.edge; $("bal").textContent=fmt(m.balance); ready=true; refresh(); buttons(); $("state").textContent="ready · set target & roll"; break;
+  case "result":{ const d=m.detail; $("bal").textContent=fmt(m.balance);
+    const mk=$("marker"); mk.style.display="block"; mk.style.left=d.roll+"%";
+    const rn=$("roll"); rn.textContent=d.roll.toFixed(2); rn.className="n "+(d.won?"win":"lose");
+    if(d.won){ Snd.win(); $("state").textContent=`win · ${m.multiplier}× · +${fmt(m.payout)}`; } else { Snd.lose(); $("state").textContent=`roll ${d.roll.toFixed(2)} · no win`; }
+    $("fair").innerHTML=`roll <b>${d.roll.toFixed(2)}</b> · SHA-256(seed)=commit <span class="ok">✓ verifiable</span>`; break; }
+  case "error": $("state").textContent="⚠ "+m.code; break; } }
+$("btnRoll").onclick=()=>{ const s=Math.round(parseFloat($("bet").value||"0")*MINOR); if(!(s>0)||!ready)return; Snd.roll(); ws.send(JSON.stringify({type:"play",game:"dice",stake:s,target:tgt(),dir,clientEntropy:randHex(16)})); };
+document.querySelectorAll(".chip2").forEach(b=>b.onclick=()=>{const c=b.dataset.chip,v=parseFloat($("bet").value||"0");$("bet").value=c==="half"?Math.max(1,Math.floor(v/2)):Math.max(1,Math.floor(v*2));});
+connect();
+</script>
+</body>
+</html>

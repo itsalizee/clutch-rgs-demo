@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Limbo — provably-fair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{ --c1:#22D3EE;--c2:#8B3FFF;--gold:#FFD23F;--green:#2BFF88;--rug:#FF3653;--text:#f4f7ff;--muted:#93a0ba;--glass:rgba(12,15,26,.66);--line:rgba(255,255,255,.12);--display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace; }
+  *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden}
+  body{font-family:var(--display);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;touch-action:manipulation;
+    background:radial-gradient(circle at 14% 8%,rgba(139,63,255,.16),transparent 45%),radial-gradient(circle at 86% 4%,rgba(34,211,238,.16),transparent 45%),#05060f}
+  .app{max-width:640px;margin:0 auto;padding:16px 16px 20px;display:flex;flex-direction:column;min-height:100vh}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .logo{font-weight:700;font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,var(--c2),var(--c1));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .chip{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--muted);margin-top:8px;display:inline-block}
+  .topright{display:flex;align-items:center;gap:10px}
+  .mute{cursor:pointer;font-family:var(--mono);font-size:15px;color:var(--muted);background:var(--glass);border:1px solid var(--line);border-radius:10px;width:34px;height:30px;display:flex;align-items:center;justify-content:center}
+  .bal{text-align:right;font-family:var(--mono)}.bal .v{font-size:20px;color:#fff}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
+  .hist{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:22px}
+  .pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted)}
+  .pill.w{color:var(--green);border-color:rgba(43,255,136,.4)}.pill.l{color:#ff9aa6;border-color:rgba(255,54,83,.35)}
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+  .big{font-weight:700;font-size:19vw;line-height:.9;color:#fff;text-shadow:0 0 46px rgba(34,211,238,.4);transition:color .1s}
+  .big.win{color:var(--green);text-shadow:0 0 50px var(--green)} .big.lose{color:var(--rug);text-shadow:0 0 50px var(--rug)}
+  .sub{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .fair{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.6);text-align:center;margin-top:6px}.fair b{color:var(--c1)}.fair .ok{color:var(--green)}
+  .dock{margin-top:auto;padding-top:14px;display:flex;flex-direction:column;gap:10px}
+  .stats{display:flex;gap:10px}
+  .stat{flex:1;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:9px 12px;text-align:center}
+  .stat .l{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}.stat .v{font-family:var(--mono);font-size:17px;font-weight:700;color:#fff;margin-top:3px}
+  .betrow{display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:10px}
+  .field{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:8px 12px}
+  .field label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:19px;width:100%;outline:none;min-width:0}
+  button.go{border:none;border-radius:16px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:19px;color:#04150c;background:linear-gradient(135deg,var(--c1),var(--green));min-height:54px}
+  button.go:disabled{opacity:.4}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><div><div class="logo">🚀 LIMBO</div><div class="chip" id="state">connecting…</div></div>
+    <div class="topright"><div class="mute" id="mute">🔊</div><div class="bal"><div class="v"><span id="bal">—</span></div><div class="u">CREDITS</div></div></div></div>
+  <div class="hist" id="hist"></div>
+  <div class="stage"><div class="big" id="big">1.00×</div><div class="sub" id="sub">pick a target — beat it to win</div></div>
+  <div class="fair" id="fair">provably fair · one verifiable roll per bet</div>
+  <div class="dock">
+    <div class="stats">
+      <div class="stat"><div class="l">Win chance</div><div class="v" id="wc">—</div></div>
+      <div class="stat"><div class="l">Pays on win</div><div class="v" id="pay">—</div></div>
+    </div>
+    <div class="betrow">
+      <div class="field"><div style="flex:1"><label>bet</label><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"></div></div>
+      <div class="field"><div style="flex:1"><label>target ×</label><input id="target" type="number" value="2.00" min="1.01" step="0.1" inputmode="decimal"></div></div>
+      <button class="go" id="btnGo" disabled>Launch 🚀</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+const $=(id)=>document.getElementById(id);
+const RGS=new URLSearchParams(location.search).get("rgs")||`${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws/originals`;
+const MINOR=100,fmt=(m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const randHex=(n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
+let ws,ready=false,edge=0.03,hist=[],anim=null;
+const Snd=(()=>{let c,m,mut=false;function e(){if(c)return;try{c=new(window.AudioContext||window.webkitAudioContext)();m=c.createGain();m.gain.value=mut?0:0.4;m.connect(c.destination);}catch(x){}}
+  function b(f,d,t,v){if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=t||"sine";o.frequency.value=f;o.connect(g);g.connect(m);const n=c.currentTime;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(v||.2,n+.005);g.gain.exponentialRampToValueAtTime(.0006,n+d);o.start(n);o.stop(n+d+.02);}
+  return{e,sweep(){e();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type="sawtooth";const n=c.currentTime;o.frequency.setValueAtTime(200,n);o.frequency.exponentialRampToValueAtTime(900,n+.7);g.gain.setValueAtTime(.08,n);g.gain.exponentialRampToValueAtTime(.0006,n+.75);o.connect(g);g.connect(m);o.start(n);o.stop(n+.77);},
+    win(){e();[660,880,1320].forEach((f,i)=>setTimeout(()=>b(f,.18,"triangle",.2),i*70));},lose(){e();b(150,.2,"sine",.16);},mute(v){mut=v;if(m&&c)m.gain.setTargetAtTime(v?0:.4,c.currentTime,.05);}};})();
+let mut=false;$("mute").onclick=()=>{mut=!mut;Snd.e();Snd.mute(mut);$("mute").textContent=mut?"🔇":"🔊";};
+const target=()=>Math.max(1.01,parseFloat($("target").value||"2"));
+function refresh(){ const T=target(); $("wc").textContent=(Math.min(100,(1-edge)/T*100)).toFixed(2)+"%"; const s=Math.round(parseFloat($("bet").value||"0")*MINOR); $("pay").textContent=fmt(Math.floor(s*T)); }
+$("target").oninput=refresh; $("bet").oninput=refresh;
+function addHist(g,won){ hist.unshift({g,won}); if(hist.length>16)hist.pop(); $("hist").innerHTML=hist.slice(0,12).map(x=>`<span class="pill ${x.won?'w':'l'}">${x.g.toFixed(2)}×</span>`).join(""); }
+function rollTo(gen,won){ if(anim)cancelAnimationFrame(anim); const big=$("big"); big.className="big"; const t0=performance.now(),dur=Math.min(900,300+Math.log2(gen)*160);
+  (function step(){ const e=Math.min(1,(performance.now()-t0)/dur); const v=1+(gen-1)*(1-Math.pow(1-e,3)); big.textContent=v.toFixed(2)+"×"; if(e<1){anim=requestAnimationFrame(step);} else { big.textContent=gen.toFixed(2)+"×"; big.className="big "+(won?"win":"lose"); } })(); }
+function connect(){ ws=new WebSocket(RGS); ws.onopen=()=>ws.send(JSON.stringify({type:"hello",sessionToken:"limbo-"+randHex(3),mode:"demo"}));
+  ws.onclose=()=>{$("state").textContent="reconnecting…";ready=false;buttons();setTimeout(()=>{if(!ready)connect();},1500);};
+  ws.onerror=()=>$("state").textContent="server unreachable"; ws.onmessage=(ev)=>handle(JSON.parse(ev.data)); }
+function buttons(){ $("btnGo").disabled=!ready; }
+function handle(m){ switch(m.type){
+  case "welcome": edge=m.config.edge; $("bal").textContent=fmt(m.balance); ready=true; refresh(); buttons(); $("state").textContent="ready · set a target & launch"; break;
+  case "result":{ const d=m.detail; $("bal").textContent=fmt(m.balance); rollTo(d.generated,d.won); addHist(d.generated,d.won);
+    if(d.won){ Snd.win(); $("state").textContent=`win · ${m.multiplier}× · +${fmt(m.payout)}`; $("sub").textContent=`beat ${d.target}× — you won`; }
+    else { Snd.lose(); $("state").textContent=`${d.generated.toFixed(2)}× · missed ${d.target}×`; $("sub").textContent=`needed ${d.target}× — landed ${d.generated.toFixed(2)}×`; }
+    $("fair").innerHTML=`rolled <b>${d.generated.toFixed(2)}×</b> · SHA-256(seed)=commit <span class="ok">✓ verifiable</span>`; break; }
+  case "error": $("state").textContent="⚠ "+m.code; break; } }
+$("btnGo").onclick=()=>{ const s=Math.round(parseFloat($("bet").value||"0")*MINOR); if(!(s>0)||!ready)return; Snd.sweep(); ws.send(JSON.stringify({type:"play",game:"limbo",stake:s,target:target(),clientEntropy:randHex(16)})); };
+connect();
+</script>
+</body>
+</html>

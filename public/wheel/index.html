@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Wheel — provably-fair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{ --c1:#22D3EE;--c2:#8B3FFF;--gold:#FFD23F;--green:#2BFF88;--rug:#FF3653;--text:#f4f7ff;--muted:#93a0ba;--glass:rgba(12,15,26,.66);--line:rgba(255,255,255,.12);--display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace; }
+  *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden}
+  body{font-family:var(--display);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;touch-action:manipulation;
+    background:radial-gradient(circle at 14% 8%,rgba(255,210,63,.13),transparent 45%),radial-gradient(circle at 86% 4%,rgba(139,63,255,.16),transparent 45%),#05060f}
+  .app{max-width:640px;margin:0 auto;padding:16px 16px 20px;display:flex;flex-direction:column;min-height:100vh}
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .logo{font-weight:700;font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,var(--gold),var(--c2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .chip{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--muted);margin-top:8px;display:inline-block}
+  .topright{display:flex;align-items:center;gap:10px}
+  .mute{cursor:pointer;font-family:var(--mono);font-size:15px;color:var(--muted);background:var(--glass);border:1px solid var(--line);border-radius:10px;width:34px;height:30px;display:flex;align-items:center;justify-content:center}
+  .bal{text-align:right;font-family:var(--mono)}.bal .v{font-size:20px;color:#fff}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative}
+  canvas{max-width:100%;display:block}
+  .res{position:absolute;top:44%;font-weight:700;font-size:44px;color:#fff;text-shadow:0 0 30px rgba(0,0,0,.8);pointer-events:none;opacity:0;transition:opacity .15s}
+  .res.show{opacity:1}
+  .fair{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.6);text-align:center;margin-top:6px}.fair b{color:var(--c1)}.fair .ok{color:var(--green)}
+  .dock{margin-top:auto;padding-top:14px;display:flex;flex-direction:column;gap:10px}
+  .selrow{display:flex;gap:8px;flex-wrap:wrap}
+  .seg{display:flex;gap:5px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:4px}
+  .seg .lb{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;align-self:center;padding:0 4px}
+  .opt{font-family:var(--mono);font-size:13px;color:var(--muted);background:transparent;border:none;border-radius:8px;padding:6px 12px;cursor:pointer}
+  .opt.on{color:#04150c;background:linear-gradient(90deg,var(--gold),var(--green));font-weight:700}
+  .betrow{display:grid;grid-template-columns:1fr 1.2fr;gap:10px}
+  .field{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:8px 12px}
+  .field label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none;min-width:0}
+  .chips{display:flex;gap:6px}.chip2{font-family:var(--mono);font-size:12px;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:9px;padding:6px 9px;cursor:pointer}
+  button.go{border:none;border-radius:16px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:20px;color:#2a1400;background:linear-gradient(135deg,var(--gold),#ff9f1c);min-height:56px}
+  button.go:disabled{opacity:.4}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><div><div class="logo">🎡 WHEEL</div><div class="chip" id="state">connecting…</div></div>
+    <div class="topright"><div class="mute" id="mute">🔊</div><div class="bal"><div class="v"><span id="bal">—</span></div><div class="u">CREDITS</div></div></div></div>
+  <div class="stage"><canvas id="c" width="620" height="620"></canvas><div class="res" id="res"></div></div>
+  <div class="fair" id="fair">provably fair · one verifiable spin per bet</div>
+  <div class="dock">
+    <div class="selrow"><div class="seg" id="riskSeg"><span class="lb">risk</span></div><div class="seg" id="segSeg"><span class="lb">segments</span></div></div>
+    <div class="betrow">
+      <div class="field"><div style="flex:1"><label>bet</label><input id="bet" type="number" value="10" min="1" step="1" inputmode="decimal"></div>
+        <div class="chips"><span class="chip2" data-chip="half">½</span><span class="chip2" data-chip="dbl">2×</span></div></div>
+      <button class="go" id="btnSpin" disabled>Spin 🎡</button>
+    </div>
+  </div>
+</div>
+<script type="module">
+const $=(id)=>document.getElementById(id);
+const cv=$("c"),ctx=cv.getContext("2d");
+const RGS=new URLSearchParams(location.search).get("rgs")||`${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws/originals`;
+const MINOR=100,fmt=(m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const randHex=(n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
+let ws,ready=false,cfg=null,segments=30,risk="medium",table=[],rot=0,spinning=false;
+const Snd=(()=>{let c,m,mut=false;function e(){if(c)return;try{c=new(window.AudioContext||window.webkitAudioContext)();m=c.createGain();m.gain.value=mut?0:0.4;m.connect(c.destination);}catch(x){}}
+  function b(f,d,t,v){if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=t||"sine";o.frequency.value=f;o.connect(g);g.connect(m);const n=c.currentTime;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(v||.2,n+.005);g.gain.exponentialRampToValueAtTime(.0006,n+d);o.start(n);o.stop(n+d+.02);}
+  return{e,tick(){if(c)b(1200,.03,"square",.05);},win(){e();[600,900,1300].forEach((f,i)=>setTimeout(()=>b(f,.18,"triangle",.2),i*70));},lose(){e();b(150,.18,"sine",.15);},mute(v){mut=v;if(m&&c)m.gain.setTargetAtTime(v?0:.4,c.currentTime,.05);}};})();
+let mut=false;$("mute").onclick=()=>{mut=!mut;Snd.e();Snd.mute(mut);$("mute").textContent=mut?"🔇":"🔊";};
+function sz(){ const s=Math.min(innerWidth-40,innerHeight-360,560); cv.width=s*2; cv.height=s*2; cv.style.width=s+"px"; cv.style.height=s+"px"; }
+function segColor(mv){ if(mv===0)return "#1b2338"; if(mv<2)return "#1c6f8f"; if(mv<5)return "#1f8f5a"; return "#c9922a"; }
+function segGlow(mv){ if(mv===0)return "#2a3550"; if(mv<2)return "#22d3ee"; if(mv<5)return "#2bff88"; return "#ffd23f"; }
+function draw(){ const W=cv.width,cx=W/2,cy=W/2,R=W*0.46; ctx.clearRect(0,0,W,W);
+  const N=segments,a=2*Math.PI/N;
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot);
+  for(let i=0;i<N;i++){ const mv=table[i]!=null?table[i]:0; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,i*a,(i+1)*a); ctx.closePath();
+    ctx.fillStyle=segColor(mv); ctx.fill(); ctx.strokeStyle="rgba(0,0,0,.35)"; ctx.lineWidth=2; ctx.stroke();
+    if(mv>0){ ctx.save(); ctx.rotate((i+0.5)*a); ctx.fillStyle=segGlow(mv); ctx.font=`700 ${Math.max(11,W*0.021)}px 'Space Mono',monospace`; ctx.textAlign="right"; ctx.textBaseline="middle"; ctx.shadowBlur=8; ctx.shadowColor=segGlow(mv); ctx.fillText(mv+"×",R-10,0); ctx.restore(); } }
+  ctx.restore();
+  // hub
+  ctx.beginPath(); ctx.arc(cx,cy,R*0.16,0,7); ctx.fillStyle="#0a0f1e"; ctx.fill(); ctx.strokeStyle="#22d3ee"; ctx.lineWidth=3; ctx.stroke();
+  // pointer (top)
+  ctx.beginPath(); ctx.moveTo(cx-14,cy-R-2); ctx.lineTo(cx+14,cy-R-2); ctx.lineTo(cx,cy-R+22); ctx.closePath(); ctx.fillStyle="#ffd23f"; ctx.shadowBlur=14; ctx.shadowColor="#ffd23f"; ctx.fill(); ctx.shadowBlur=0;
+}
+function loop(){ requestAnimationFrame(loop); draw(); } sz(); loop(); addEventListener("resize",()=>{sz();});
+function spinTo(seg,cb){ const N=segments,a=2*Math.PI/N; // land segment center at top (-PI/2)
+  const targetBase=-Math.PI/2-(seg+0.5)*a; const spins=5*2*Math.PI; const start=rot; let cur=((start%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  const end=start+spins+(((targetBase - (start+spins))%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  const t0=performance.now(),dur=2900; let lastTick=-1;
+  (function step(){ const e=Math.min(1,(performance.now()-t0)/dur); const ease=1-Math.pow(1-e,3.2); rot=start+(end-start)*ease;
+    const seg2=Math.floor(((-rot-Math.PI/2)/a%N+N*4)%N); if(seg2!==lastTick){Snd.tick();lastTick=seg2;}
+    if(e<1)requestAnimationFrame(step); else {rot=end;cb();} })(); }
+function renderSegs(){ const rs=$("riskSeg"); rs.querySelectorAll(".opt").forEach(o=>o.remove());
+  cfg.wheel.risks.forEach(k=>{const b=document.createElement("button");b.className="opt"+(k===risk?" on":"");b.textContent=k;b.onclick=()=>{if(spinning)return;risk=k;renderSegs();table=cfg.wheel.tables[segments+":"+risk];};rs.appendChild(b);});
+  const ss=$("segSeg"); ss.querySelectorAll(".opt").forEach(o=>o.remove());
+  cfg.wheel.segments.forEach(n=>{const b=document.createElement("button");b.className="opt"+(n===segments?" on":"");b.textContent=n;b.onclick=()=>{if(spinning)return;segments=n;renderSegs();table=cfg.wheel.tables[segments+":"+risk];};ss.appendChild(b);}); }
+function connect(){ ws=new WebSocket(RGS); ws.onopen=()=>ws.send(JSON.stringify({type:"hello",sessionToken:"wheel-"+randHex(3),mode:"demo"}));
+  ws.onclose=()=>{$("state").textContent="reconnecting…";ready=false;buttons();setTimeout(()=>{if(!ready)connect();},1500);};
+  ws.onerror=()=>$("state").textContent="server unreachable"; ws.onmessage=(ev)=>handle(JSON.parse(ev.data)); }
+function buttons(){ $("btnSpin").disabled=!ready||spinning; }
+function handle(m){ switch(m.type){
+  case "welcome": cfg=m.config; segments=cfg.wheel.defaultSegments; risk=cfg.wheel.defaultRisk; table=cfg.wheel.tables[segments+":"+risk]; $("bal").textContent=fmt(m.balance); ready=true; renderSegs(); buttons(); $("state").textContent="ready · pick risk & spin"; break;
+  case "result":{ const d=m.detail; if(d.segments!==segments||d.risk!==risk){segments=d.segments;risk=d.risk;table=cfg.wheel.tables[segments+":"+risk];renderSegs();}
+    $("res").classList.remove("show");
+    spinTo(d.segment,()=>{ spinning=false; buttons(); $("bal").textContent=fmt(m.balance);
+      const r=$("res"); r.textContent=m.multiplier+"×"; r.style.color=m.multiplier>0?"#2bff88":"#ff8a97"; r.classList.add("show"); setTimeout(()=>r.classList.remove("show"),1400);
+      if(m.multiplier>0){Snd.win();$("state").textContent=`${m.multiplier}× · +${fmt(m.payout)}`;}else{Snd.lose();$("state").textContent="no win — spin again";}
+      $("fair").innerHTML=`segment <b>${d.segment}</b> · <b>${m.multiplier}×</b> · SHA-256(seed)=commit <span class="ok">✓ verifiable</span>`; }); break; }
+  case "error": spinning=false; buttons(); $("state").textContent="⚠ "+m.code; break; } }
+$("btnSpin").onclick=()=>{ const s=Math.round(parseFloat($("bet").value||"0")*MINOR); if(!(s>0)||!ready||spinning)return; spinning=true; buttons(); Snd.e(); $("state").textContent="spinning…"; ws.send(JSON.stringify({type:"play",game:"wheel",stake:s,segments,risk,clientEntropy:randHex(16)})); };
+document.querySelectorAll(".chip2").forEach(b=>b.onclick=()=>{const c=b.dataset.chip,v=parseFloat($("bet").value||"0");$("bet").value=c==="half"?Math.max(1,Math.floor(v/2)):Math.max(1,Math.floor(v*2));});
+connect();
+</script>
+</body>
+</html>
