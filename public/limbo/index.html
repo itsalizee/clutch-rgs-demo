@@ -21,8 +21,12 @@
   .hist{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:22px}
   .pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted)}
   .pill.w{color:var(--green);border-color:rgba(43,255,136,.4)}.pill.l{color:#ff9aa6;border-color:rgba(255,54,83,.35)}
-  .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
-  .big{font-weight:700;font-size:19vw;line-height:.9;color:#fff;text-shadow:0 0 46px rgba(34,211,238,.4);transition:color .1s}
+  .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;overflow:hidden}
+  .rocketlane{position:absolute;left:9%;top:7%;bottom:13%;width:56px;pointer-events:none;z-index:1}
+  .trail{position:absolute;left:20px;bottom:6px;width:8px;height:0;border-radius:8px;background:linear-gradient(180deg,#fff,#FFD23F 30%,#FF7A18 60%,rgba(255,54,83,0));filter:blur(1.5px);opacity:.9}
+  .rocket{position:absolute;left:0;bottom:0;font-size:44px;line-height:1;transform:translateY(0) rotate(-6deg);will-change:transform;filter:drop-shadow(0 0 16px rgba(34,211,238,.6))}
+  .rocket.win{filter:drop-shadow(0 0 26px var(--green))} .rocket.lose{filter:drop-shadow(0 0 22px var(--rug))}
+  .big{font-weight:700;font-size:16vw;line-height:.9;color:#fff;text-shadow:0 0 46px rgba(34,211,238,.4);transition:color .1s;position:relative;z-index:2}
   .big.win{color:var(--green);text-shadow:0 0 50px var(--green)} .big.lose{color:var(--rug);text-shadow:0 0 50px var(--rug)}
   .sub{font-family:var(--mono);font-size:13px;color:var(--muted)}
   .fair{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.6);text-align:center;margin-top:6px}.fair b{color:var(--c1)}.fair .ok{color:var(--green)}
@@ -43,7 +47,10 @@
   <div class="top"><div><div class="logo">🚀 LIMBO</div><div class="chip" id="state">connecting…</div></div>
     <div class="topright"><div class="mute" id="mute">🔊</div><div class="bal"><div class="v"><span id="bal">—</span></div><div class="u">CREDITS</div></div></div></div>
   <div class="hist" id="hist"></div>
-  <div class="stage"><div class="big" id="big">1.00×</div><div class="sub" id="sub">pick a target — beat it to win</div></div>
+  <div class="stage">
+    <div class="rocketlane"><div class="trail" id="trail"></div><div class="rocket" id="rocket">🚀</div></div>
+    <div class="big" id="big">1.00×</div><div class="sub" id="sub">pick a target — beat it to win</div>
+  </div>
   <div class="fair" id="fair">provably fair · one verifiable roll per bet</div>
   <div class="dock">
     <div class="stats">
@@ -72,8 +79,13 @@ const target=()=>Math.max(1.01,parseFloat($("target").value||"2"));
 function refresh(){ const T=target(); $("wc").textContent=(Math.min(100,(1-edge)/T*100)).toFixed(2)+"%"; const s=Math.round(parseFloat($("bet").value||"0")*MINOR); $("pay").textContent=fmt(Math.floor(s*T)); }
 $("target").oninput=refresh; $("bet").oninput=refresh;
 function addHist(g,won){ hist.unshift({g,won}); if(hist.length>16)hist.pop(); $("hist").innerHTML=hist.slice(0,12).map(x=>`<span class="pill ${x.won?'w':'l'}">${x.g.toFixed(2)}×</span>`).join(""); }
-function rollTo(gen,won){ if(anim)cancelAnimationFrame(anim); const big=$("big"); big.className="big"; const t0=performance.now(),dur=Math.min(900,300+Math.log2(gen)*160);
-  (function step(){ const e=Math.min(1,(performance.now()-t0)/dur); const v=1+(gen-1)*(1-Math.pow(1-e,3)); big.textContent=v.toFixed(2)+"×"; if(e<1){anim=requestAnimationFrame(step);} else { big.textContent=gen.toFixed(2)+"×"; big.className="big "+(won?"win":"lose"); } })(); }
+function rollTo(gen,won){ if(anim)cancelAnimationFrame(anim); const big=$("big"),rk=$("rocket"),tr=$("trail"),lane=rk.parentElement;
+  big.className="big"; rk.className="rocket"; rk.textContent="🚀"; const laneH=lane.clientHeight-44; const refMax=Math.max(gen*1.1,12); const t0=performance.now(),dur=Math.min(1000,340+Math.log2(gen)*170);
+  (function step(){ const e=Math.min(1,(performance.now()-t0)/dur); const ease=1-Math.pow(1-e,3); const v=1+(gen-1)*ease;
+    big.textContent=v.toFixed(2)+"×"; const y=Math.max(0,Math.log(v)/Math.log(refMax))*laneH; rk.style.transform=`translateY(${-y}px) rotate(${-6-Math.sin(performance.now()/60)*3}deg)`; tr.style.height=y+"px";
+    if(e<1){anim=requestAnimationFrame(step);}
+    else { big.textContent=gen.toFixed(2)+"×"; big.className="big "+(won?"win":"lose"); rk.className="rocket "+(won?"win":"lose");
+      if(!won){ rk.textContent="💥"; tr.style.height="0"; } } })(); }
 function connect(){ ws=new WebSocket(RGS); ws.onopen=()=>ws.send(JSON.stringify({type:"hello",sessionToken:"limbo-"+randHex(3),mode:"demo"}));
   ws.onclose=()=>{$("state").textContent="reconnecting…";ready=false;buttons();setTimeout(()=>{if(!ready)connect();},1500);};
   ws.onerror=()=>$("state").textContent="server unreachable"; ws.onmessage=(ev)=>handle(JSON.parse(ev.data)); }

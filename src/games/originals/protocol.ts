@@ -13,6 +13,7 @@ export type OriginalsClientMessage =
   | { type: "play"; game: "dice"; stake: Minor; target: number; dir: DiceDir; clientEntropy?: string }
   | { type: "play"; game: "limbo"; stake: Minor; target: number; clientEntropy?: string }
   | { type: "play"; game: "wheel"; stake: Minor; segments: number; risk: WheelRisk; clientEntropy?: string }
+  | { type: "play"; game: "slots"; stake: Minor; clientEntropy?: string }
   | { type: "ping" };
 
 export type OriginalsServerMessage =

@@ -79,6 +79,7 @@ export class OriginalsOrchestrator {
 function toParams(m: Extract<OriginalsClientMessage, { type: "play" }>): PlayParams {
   if (m.game === "dice") return { game: "dice", target: m.target, dir: m.dir };
   if (m.game === "limbo") return { game: "limbo", target: m.target };
+  if (m.game === "slots") return { game: "slots" };
   return { game: "wheel", segments: m.segments, risk: m.risk };
 }
 

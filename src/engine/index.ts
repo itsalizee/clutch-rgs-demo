@@ -12,3 +12,4 @@ export * from "./plinko";
 export * from "./dice";
 export * from "./limbo";
 export * from "./wheel";
+export * from "./slots";

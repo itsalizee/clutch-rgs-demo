@@ -12,16 +12,18 @@ import {
   diceOutcome, DICE_MIN_TARGET, DICE_MAX_TARGET, type DiceDir,
   limboOutcome, LIMBO_MIN_TARGET, LIMBO_MAX_TARGET,
   wheelOutcome, wheelTable, WHEEL_SEGMENTS, WHEEL_RISKS, DEFAULT_SEGMENTS, DEFAULT_WHEEL_RISK, type WheelRisk,
+  slotsOutcome, slotsPaytable, SLOTS_SYMBOLS, SLOTS_WEIGHTS,
 } from "../../engine/index.js";
 import { DEFAULT_EDGE } from "../../engine/crash.js";
 
-export type OriginalGame = "dice" | "limbo" | "wheel";
+export type OriginalGame = "dice" | "limbo" | "wheel" | "slots";
 export interface Reveal { serverSeed: string; clientSeed: string; nonce: number; }
 
 export type PlayParams =
   | { game: "dice"; target: number; dir: DiceDir }
   | { game: "limbo"; target: number }
-  | { game: "wheel"; segments: number; risk: WheelRisk };
+  | { game: "wheel"; segments: number; risk: WheelRisk }
+  | { game: "slots" };
 
 export interface PlayOutcome {
   game: OriginalGame;
@@ -73,6 +75,7 @@ export class OriginalsEngine {
       dice: { minTarget: DICE_MIN_TARGET, maxTarget: DICE_MAX_TARGET },
       limbo: { minTarget: LIMBO_MIN_TARGET, maxTarget: LIMBO_MAX_TARGET },
       wheel: { segments: [...WHEEL_SEGMENTS], risks: WHEEL_RISKS, defaultSegments: DEFAULT_SEGMENTS, defaultRisk: DEFAULT_WHEEL_RISK, tables },
+      slots: { symbols: [...SLOTS_SYMBOLS], weights: [...SLOTS_WEIGHTS], paytable: slotsPaytable(this.edge) },
     };
   }
 
@@ -86,6 +89,7 @@ export class OriginalsEngine {
       if (p.game === "dice") { const o = diceOutcome(seeds, p.target, p.dir, this.edge); multiplier = o.multiplier; detail = { roll: o.roll, won: o.won, target: o.target, dir: o.dir }; }
       else if (p.game === "limbo") { const o = limboOutcome(seeds, p.target, this.edge); multiplier = o.multiplier; detail = { generated: o.generated, won: o.won, target: o.target }; }
       else if (p.game === "wheel") { const o = wheelOutcome(seeds, p.segments, p.risk, this.edge); multiplier = o.multiplier; detail = { segment: o.segment, segments: o.segments, risk: o.risk, won: o.multiplier > 0 }; }
+      else if (p.game === "slots") { const o = slotsOutcome(seeds, this.edge); multiplier = o.multiplier; detail = { grid: o.grid, line: o.line, tier: o.tier, won: o.won }; }
       else throw new OriginalsEngineError("bad_game", "unknown game");
     } catch (e) { throw new OriginalsEngineError((e as OriginalsEngineError).code ?? "bad_params", (e as Error).message); }
     this.prevServerSeed = serverSeed; // chain forward

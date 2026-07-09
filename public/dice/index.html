@@ -19,10 +19,20 @@
   .topright{display:flex;align-items:center;gap:10px}
   .mute{cursor:pointer;font-family:var(--mono);font-size:15px;color:var(--muted);background:var(--glass);border:1px solid var(--line);border-radius:10px;width:34px;height:30px;display:flex;align-items:center;justify-content:center}
   .bal{text-align:right;font-family:var(--mono)}.bal .v{font-size:20px;color:#fff}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
-  .stage{flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;padding:10px 4px}
-  .roll{text-align:center}.roll .n{font-weight:700;font-size:15vw;line-height:.9;color:#fff;text-shadow:0 0 40px rgba(34,211,238,.4)}
-  .roll .n.win{color:var(--green);text-shadow:0 0 44px var(--green)} .roll .n.lose{color:var(--rug);text-shadow:0 0 44px var(--rug)}
-  .roll .s{font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:6px}
+  .stage{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:10px 4px}
+  .diewrap{display:flex;justify-content:center;perspective:820px;height:150px;align-items:center}
+  .die{width:128px;height:128px;position:relative;transform-style:preserve-3d;transform:rotateX(-16deg) rotateY(-18deg);filter:drop-shadow(0 24px 30px rgba(0,0,0,.55))}
+  .die.rolling{animation:tumble .82s cubic-bezier(.28,.72,.35,1)}
+  @keyframes tumble{0%{transform:rotateX(-16deg) rotateY(-18deg)}22%{transform:rotateX(210deg) rotateY(160deg)}48%{transform:rotateX(410deg) rotateY(300deg)}72%{transform:rotateX(560deg) rotateY(470deg)}100%{transform:rotateX(-16deg) rotateY(-18deg)}}
+  .face{position:absolute;width:128px;height:128px;border-radius:22px;background:linear-gradient(150deg,#ffffff,#c8d0df);box-shadow:inset 0 3px 6px rgba(255,255,255,.9),inset 0 -8px 14px rgba(10,14,30,.22);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:18px}
+  .pip{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#3a4256,#0c0e18);align-self:center;justify-self:center;box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+  .face.front{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:46px;color:#12141d;font-family:var(--mono)}
+  .face.front.win{background:linear-gradient(150deg,#d6ffe8,#5cf3a0);color:#053a1c;box-shadow:inset 0 3px 6px rgba(255,255,255,.9),0 0 40px rgba(43,255,136,.5)}
+  .face.front.lose{background:linear-gradient(150deg,#ffd9de,#ff6070);color:#4a0910;box-shadow:inset 0 3px 6px rgba(255,255,255,.7),0 0 40px rgba(255,54,83,.5)}
+  .front{transform:translateZ(64px)}.back{transform:rotateY(180deg) translateZ(64px)}
+  .right{transform:rotateY(90deg) translateZ(64px)}.left{transform:rotateY(-90deg) translateZ(64px)}
+  .up{transform:rotateX(90deg) translateZ(64px)}.down{transform:rotateX(-90deg) translateZ(64px)}
+  .s{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:center;display:block}
   .track{position:relative;height:16px;border-radius:999px;background:linear-gradient(90deg,var(--rug),var(--rug));overflow:visible;margin:0 8px}
   .track .win{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,var(--green),var(--c1));border-radius:999px}
   .ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin:7px 8px 0}
@@ -51,7 +61,8 @@
   <div class="top"><div><div class="logo">🎲 DICE</div><div class="chip" id="state">connecting…</div></div>
     <div class="topright"><div class="mute" id="mute">🔊</div><div class="bal"><div class="v"><span id="bal">—</span></div><div class="u">CREDITS</div></div></div></div>
   <div class="stage">
-    <div class="roll"><div class="n" id="roll">—</div><div class="s" id="sub">roll over your target to win</div></div>
+    <div class="diewrap"><div class="die" id="die"><div class="face front" id="roll">—</div></div></div>
+    <div class="s" id="sub">roll over your target to win</div>
     <div>
       <div class="track" id="track"><div class="win" id="win"></div><div class="marker" id="marker" style="display:none"><i></i></div></div>
       <div class="ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
@@ -75,10 +86,16 @@
 </div>
 <script type="module">
 const $=(id)=>document.getElementById(id);
+// build the 5 pip faces (front face holds the result number)
+const PIPS={1:[[2,2]],2:[[1,1],[3,3]],3:[[1,1],[2,2],[3,3]],4:[[1,1],[3,1],[1,3],[3,3]],5:[[1,1],[3,1],[2,2],[1,3],[3,3]]};
+(function buildDie(){ const die=document.getElementById("die"); const cls=["back","right","left","up","down"];
+  cls.forEach((c,i)=>{ const f=document.createElement("div"); f.className="face "+c;
+    for(const [col,row] of PIPS[i+1]){ const p=document.createElement("div"); p.className="pip"; p.style.gridColumn=col; p.style.gridRow=row; f.appendChild(p); }
+    die.appendChild(f); }); })();
 const RGS=new URLSearchParams(location.search).get("rgs")||`${location.protocol==="https:"?"wss":"ws"}://${location.host}/ws/originals`;
 const MINOR=100,fmt=(m)=>(m/MINOR).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
 const randHex=(n)=>{const b=new Uint8Array(n);crypto.getRandomValues(b);return [...b].map(x=>x.toString(16).padStart(2,"0")).join("")};
-let ws,ready=false,edge=0.03,dir="over";
+let ws,ready=false,edge=0.03,dir="over",rollStart=0;
 const Snd=(()=>{let c,m,mut=false;function e(){if(c)return;try{c=new(window.AudioContext||window.webkitAudioContext)();m=c.createGain();m.gain.value=mut?0:0.4;m.connect(c.destination);}catch(x){}}
   function b(f,d,t,v){if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=t||"sine";o.frequency.value=f;o.connect(g);g.connect(m);const n=c.currentTime;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(v||.2,n+.005);g.gain.exponentialRampToValueAtTime(.0006,n+d);o.start(n);o.stop(n+d+.02);}
   return{e,roll(){e();b(300,.08,"triangle",.15);},win(){e();[600,900,1200].forEach((f,i)=>setTimeout(()=>b(f,.16,"triangle",.2),i*60));},lose(){e();b(160,.16,"sine",.16);},mute(v){mut=v;if(m&&c)m.gain.setTargetAtTime(v?0:.4,c.currentTime,.05);}};})();
@@ -100,11 +117,14 @@ function handle(m){ switch(m.type){
   case "welcome": edge=m.config.edge; $("bal").textContent=fmt(m.balance); ready=true; refresh(); buttons(); $("state").textContent="ready · set target & roll"; break;
   case "result":{ const d=m.detail; $("bal").textContent=fmt(m.balance);
     const mk=$("marker"); mk.style.display="block"; mk.style.left=d.roll+"%";
-    const rn=$("roll"); rn.textContent=d.roll.toFixed(2); rn.className="n "+(d.won?"win":"lose");
+    const rn=$("roll"); const wait=Math.max(120,660-(performance.now()-rollStart));
+    setTimeout(()=>{ rn.textContent=d.roll.toFixed(0); rn.className="face front "+(d.won?"win":"lose"); },wait);
     if(d.won){ Snd.win(); $("state").textContent=`win · ${m.multiplier}× · +${fmt(m.payout)}`; } else { Snd.lose(); $("state").textContent=`roll ${d.roll.toFixed(2)} · no win`; }
     $("fair").innerHTML=`roll <b>${d.roll.toFixed(2)}</b> · SHA-256(seed)=commit <span class="ok">✓ verifiable</span>`; break; }
   case "error": $("state").textContent="⚠ "+m.code; break; } }
-$("btnRoll").onclick=()=>{ const s=Math.round(parseFloat($("bet").value||"0")*MINOR); if(!(s>0)||!ready)return; Snd.roll(); ws.send(JSON.stringify({type:"play",game:"dice",stake:s,target:tgt(),dir,clientEntropy:randHex(16)})); };
+$("btnRoll").onclick=()=>{ const s=Math.round(parseFloat($("bet").value||"0")*MINOR); if(!(s>0)||!ready)return; Snd.roll();
+  const die=$("die"),rn=$("roll"); rollStart=performance.now(); rn.className="face front"; die.classList.remove("rolling"); void die.offsetWidth; die.classList.add("rolling");
+  ws.send(JSON.stringify({type:"play",game:"dice",stake:s,target:tgt(),dir,clientEntropy:randHex(16)})); };
 document.querySelectorAll(".chip2").forEach(b=>b.onclick=()=>{const c=b.dataset.chip,v=parseFloat($("bet").value||"0");$("bet").value=c==="half"?Math.max(1,Math.floor(v/2)):Math.max(1,Math.floor(v*2));});
 connect();
 </script>

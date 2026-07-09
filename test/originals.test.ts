@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   diceOutcome, diceMultiplier, winChancePct, rollFor,
   limboOutcome, wheelTable, wheelRtp, wheelOutcome, WHEEL_SEGMENTS, WHEEL_RISKS,
+  slotsOutcome, slotsRtp, SLOTS_SYMBOLS,
   sha256hex, DEFAULT_EDGE, type RoundSeeds,
 } from "../src/engine/index.js";
 
@@ -48,5 +49,28 @@ describe("Wheel — provably fair", () => {
     for (let i = 0; i < N; i++) { const o = wheelOutcome(seedsFor(i), seg, "medium"); counts[o.segment]++;
       expect(wheelOutcome(seedsFor(i), seg, "medium").segment).toBe(o.segment); }
     for (const c of counts) expect(Math.abs(c / N - 1 / seg)).toBeLessThan(0.01);
+  });
+});
+
+describe("Slots (Fortune Reels) — provably fair", () => {
+  it("exact enumerated RTP is house-favourable and close to (1 - edge)", () => {
+    const rtp = slotsRtp();
+    expect(rtp).toBeLessThanOrEqual(R + 1e-9);   // never pays over the target
+    expect(rtp).toBeGreaterThan(R - 0.01);        // within a cent of quantization
+  });
+  it("realized RTP over a long run matches the enumerated RTP (Monte Carlo)", () => {
+    const N = 120000; let ret = 0;
+    for (let i = 0; i < N; i++) ret += slotsOutcome(seedsFor(i)).multiplier;
+    expect(Math.abs(ret / N - slotsRtp())).toBeLessThan(0.03);
+  });
+  it("grid is 3×3 of valid symbols, deterministic, and the center line drives payout", () => {
+    for (let i = 0; i < 5000; i++) {
+      const o = slotsOutcome(seedsFor(i));
+      expect(o.grid.length).toBe(3);
+      for (const reel of o.grid) { expect(reel.length).toBe(3); for (const s of reel) { expect(s).toBeGreaterThanOrEqual(0); expect(s).toBeLessThan(SLOTS_SYMBOLS.length); } }
+      expect(o.line).toEqual([o.grid[0][1], o.grid[1][1], o.grid[2][1]]);
+      expect(o.won).toBe(o.multiplier > 0);
+      expect(slotsOutcome(seedsFor(i)).multiplier).toBe(o.multiplier); // deterministic
+    }
   });
 });
