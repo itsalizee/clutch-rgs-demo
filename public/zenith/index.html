@@ -31,8 +31,8 @@
   .hist{display:flex;gap:6px;padding:8px 16px 0;flex-wrap:wrap;max-width:74%}
   .pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted)}
   .pill.mid{color:#9ff0ff;border-color:rgba(34,211,238,.4)} .pill.hi{color:var(--gold);border-color:rgba(255,210,63,.5)} .pill.mega{color:#ff8fd0;border-color:rgba(255,46,151,.6)}
-  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:-6vh;pointer-events:none}
-  .big{font-weight:700;font-size:14vw;line-height:.9;color:var(--gold);text-shadow:0 0 42px currentColor,0 6px 20px #000;transition:color .12s;letter-spacing:-.02em}
+  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:7vh;pointer-events:none}
+  .big{font-weight:700;font-size:clamp(2.6rem,8.5vw,5.25rem);line-height:.9;color:var(--gold);text-shadow:0 0 13px currentColor,0 3px 10px rgba(0,0,0,.6);transition:color .12s;letter-spacing:-.02em}
   .big.run{color:#fff}.big.bust{color:var(--rug)}
   .big.pop{animation:pop .28s ease-out}
   @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.13)}100%{transform:scale(1)}}
@@ -74,7 +74,7 @@
   @keyframes toastup{0%{opacity:0;transform:translate(-50%,14px) scale(.85)}16%{opacity:1;transform:translate(-50%,-4px) scale(1.08)}64%{opacity:1;transform:translate(-50%,-46px) scale(1)}100%{opacity:0;transform:translate(-50%,-82px) scale(1)}}
   .chip.bet.urgent{animation:urg .5s ease-in-out infinite}
   @keyframes urg{0%,100%{filter:none}50%{filter:brightness(1.35)}}
-  @media(max-width:560px){ .panel{grid-template-columns:1fr} .hist{max-width:100%} .big{font-size:22vw} }
+  @media(max-width:560px){ .panel{grid-template-columns:1fr} .hist{max-width:100%} .big{font-size:14vw} }
 </style>
 </head>
 <body>
@@ -350,7 +350,7 @@ function handle(m){ switch(m.type){
   case "jackpot": $("bal").textContent=fmt(m.balance); break;
   case "crash":{ gphase="between"; phase="fall"; const r=m.round; shake=0.7; fallV=6; flash("rgba(255,50,50,.5)");
     hist.unshift(r.crashPoint); renderHist(); Snd.climbStop(); Snd.fall();
-    $("big").className="big bust"; $("big").textContent=r.crashPoint.toFixed(2)+"×";
+    $("big").className="big bust"; $("big").style.color=""; $("big").textContent=r.crashPoint.toFixed(2)+"×";
     $("sub").textContent=(myBet&&!myBet.cashed)?`FELL at ${r.crashPoint.toFixed(2)}× — you dropped`:`fell at ${r.crashPoint.toFixed(2)}×`;
     $("fair").innerHTML=`revealed <b>${r.serverSeed.slice(0,14)}…</b> · fell <b>${r.crashPoint.toFixed(2)}×</b> · <span class="ok">✓ verifiable</span>`;
     stateChip("fell","bust"); if(!myBet||myBet.cashed){ $("cashamt").textContent="Cash out"; $("cashsub").textContent="tap to secure"; } myBet=null; buttons(); break; }
