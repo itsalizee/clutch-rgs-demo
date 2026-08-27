@@ -37,6 +37,14 @@ export interface GameDef {
 
 export const GAMES: GameDef[] = [
   {
+    id: "afterburn",
+    name: "Afterburn",
+    type: "crash",
+    blurb: "The flagship crash — a jet climbs a heat-mapped multiplier; hedge two bets and cash out before it flames out.",
+    ux: { dualBet: true },
+    tuning: { bettingMs: 5000, intermissionMs: 3000, tickMs: 40, growth: 0.19, moonPoolBase: 250_000 },
+  },
+  {
     id: "ascent",
     name: "Ascent",
     type: "crash",
