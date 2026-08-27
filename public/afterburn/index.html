@@ -435,7 +435,7 @@ function handle(m){ if(typeof m.balance==='number')setBal(m.balance); switch(m.t
     $('mult').className='mult'; $('mult').style.color=''; $('mult').textContent='1.00×'; $('status').textContent='place your bets';
     spawnFeed(); updateActs(); countdown(); break;
   case 'betting_closed':
-    G.phase='flying'; G.flyStart=nowMs(); G.viewCeil=6; $('countbar').style.width='0%'; Snd.engineOn(); Snd.launch(); kick(3); burst(W*0.12,H*0.9,14,1.6);
+    G.phase='flying'; G.flyStart=nowMs(); G.viewCeil=6; $('countbar').style.width='0%'; Snd.engineOn(); Snd.launch(); burst(W*0.12,H*0.9,12,1.6);
     $('status').textContent='in flight — cash out!'; $('mult').className='mult run'; updateActs();
     if(!flyRAF)flyRAF=requestAnimationFrame(flyLoop); break;
   case 'tick': G.target=m.multiplier; break;
@@ -465,9 +465,9 @@ function flyLoop(){ if(G.phase!=='flying'){ flyRAF=0; return; }
   if(trail.length>1){ const a=trail[trail.length-2]; G.jetAng=Math.atan2(y-a.y,x-a.x); }
   emit(x,y,G.jetAng,G.mult);
   const col=heat(G.mult); const mEl=$('mult'); mEl.style.color=rgb(col); mEl.textContent=G.mult.toFixed(2)+'×';
-  if(Math.floor(G.mult)>lastPop){ lastPop=Math.floor(G.mult); mEl.classList.remove('pop');void mEl.offsetWidth;mEl.classList.add('pop'); }
   Snd.enginePitch(G.mult);
-  while(mIdx<MILES.length && G.mult>=MILES[mIdx]){ const v=MILES[mIdx]; mIdx++; flashC('rgba(255,210,63,.2)'); kick(5); burst(x,y,10,G.mult); Snd.milestone(mIdx); haptic(15); $('status').textContent=`${v}× — keep climbing`; }
+  // milestones: a gentle number-pop + soft chime only — NO screen shake, NO flash while climbing
+  while(mIdx<MILES.length && G.mult>=MILES[mIdx]){ const v=MILES[mIdx]; mIdx++; mEl.classList.remove('pop');void mEl.offsetWidth;mEl.classList.add('pop'); Snd.milestone(mIdx); $('status').textContent=`${v}× — keep climbing`; }
   if(G.mult>bestMult){ bestMult=G.mult; $('best').textContent=bestMult.toFixed(2)+'×'; }
   panels.forEach(p=>{ if(p.placed&&!p.cashed&&p.betId){ const a=$('act'+p.i); if(a){ const pay=Math.floor(p.stakeCents*G.mult); a.innerHTML=`<span class="big">CASH OUT ${money(pay)}</span><span class="sm">${G.mult.toFixed(2)}× · +${money(pay-p.stakeCents)}</span>`; } } });
   updateFeedLive();
