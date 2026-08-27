@@ -11,7 +11,7 @@ Ignite/916 Gaming release; corroborated by iGaming Future, iGaming Business.)*
 solves our certification and distribution gaps, while we bring finished, differentiated games.
 
 ## Our fit, in one paragraph
-Clutch has **already built** a differentiated provably-fair flagship (**Zenith**) and five
+Clutch has **already built** a differentiated provably-fair flagship (**Zenith**) and nine
 more live games on a server-authoritative RGS — playable today. Ignite's value (a certified
 platform + Fusion distribution) is exactly what turns our finished games into real-money,
 widely-distributed titles. The 916 Gaming precedent shows Ignite backs new studios with strong
@@ -42,12 +42,14 @@ Is Pariplay's **Ignite** program open to a new studio whose games are already bu
 playable? I saw you brought **916 Gaming** on board — we're at a similar stage, with finished
 content.
 
-I'm `[Founder name]`, founder of **Clutch Studios**. We've shipped a differentiated,
-provably-fair flagship — **Zenith**, a *shared-round vertical climb* — plus five more live
-games across crash, step-multiplier, and mines, all on our own server-authoritative RGS.
+I'm `Ali Z`, founder of **Clutch Studios**. We've shipped a differentiated,
+provably-fair flagship — **Zenith**, a *shared-round vertical climb* — plus nine more live
+games across crash, step-multiplier, mines, plinko, originals, and slots, all on our own server-authoritative RGS.
 **Play them in a browser right now:**
 
-▶ **https://clutchstudios.co/play**  (flagship: **/zenith/** · verify fairness: **/fairness**)
+▶ All ten: **https://clutchstudios.co/play**
+▶ Flagship (Zenith): **https://clutch-rgs-demo.onrender.com/zenith/**
+▶ Verify fairness: **https://clutch-rgs-demo.onrender.com/fairness**
 
 We don't hold our own certification/licence yet — which is why **Ignite's certified platform +
 Fusion distribution** looks like the right fit. We bring finished, differentiated games and a
@@ -56,4 +58,4 @@ built-to-certify RGS.
 Could we grab 30 minutes? I'll demo Zenith live and share our deck + technical overview.
 
 Best,
-`[Founder name]` · Clutch Studios · team@clutchstudios.co · clutchstudios.co
+`Ali Z` · Clutch Studios · partnership@clutchstudios.co · clutchstudios.co

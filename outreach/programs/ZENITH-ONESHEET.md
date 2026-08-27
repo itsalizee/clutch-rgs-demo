@@ -47,4 +47,4 @@ Playable now in play-money mode; the live engine, provably-fair scheme, and RTP 
 what runs in production. Pre-certification/pre-license — the reason we're partnering with an
 emerging-studio program.
 
-**Clutch Studios** · team@clutchstudios.co · clutchstudios.co
+**Clutch Studios** · partnership@clutchstudios.co · clutchstudios.co

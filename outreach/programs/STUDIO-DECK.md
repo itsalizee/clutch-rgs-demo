@@ -9,11 +9,11 @@ invent nothing (no traction, team, cert, or awards we don't have).*
 **Clutch Studios**
 Provably-fair instant games, built server-authoritative and built to certify.
 *Play the whole catalogue in 60 seconds → clutchstudios.co/play*
-`[Founder name] · team@clutchstudios.co`
+`Ali Z · partnership@clutchstudios.co`
 
 ## 2 — The one-liner
 We build **crash and instant games** for the operators your network serves — mobile-first,
-provably fair, verifiable every round. **Six live games across three mechanics, on one
+provably fair, verifiable every round. **Ten live games across seven mechanics, on one
 integration — all playable in a browser right now.** Most studios pitch a deck; we pitch a
 link.
 
@@ -30,12 +30,16 @@ altitude is your multiplier, secure it before the fall.
 ## 4 — The catalogue (range from one supplier)
 | Mechanic | Titles |
 |---|---|
+| **Shared-round climb** | Zenith *(flagship — one climber, the whole round watches)* |
 | **Crash** | Ascent (multiplayer, Moon Pool jackpot) · Overdrive (3D turbo car-crash) |
-| **Step-multiplier climb** | Zenith *(flagship)* · Ascent Cross · Redline |
+| **Step-multiplier** | Ascent Cross (climb platform by platform, one hidden lane) |
 | **Mines** | Vault (25-tile, player-set volatility) |
+| **Plinko** | Prism (pick your risk & rows, up to 1000×) |
+| **Originals** | Dice · Limbo · Wheel (instant, one-tap classics) |
+| **Slots** | Fortune Reels (3-reel, wilds, jackpot line) |
 
-Three distinct player audiences. One onboarding. **Adding the next title is a config change,
-not a new integration.**
+Seven mechanics, several distinct player audiences, one onboarding. **Adding the next title
+is a config change, not a new integration.**
 
 ## 5 — The technology (the real asset)
 A production **server-authoritative RGS** (Node/TypeScript):
@@ -54,12 +58,11 @@ feature for crypto-forward operators** — the segment most open to fresh studio
 for it natively, not bolted on.
 
 ## 7 — The team
-`[Founder name] — [one honest line: role + any real, verifiable background. If you're solo
-and new, say so plainly; do not inflate. "Independent founder; built the RGS and all six
-games." is a stronger, honest line than a fake résumé.]`
+`Ali Z — independent founder. I designed and built the RGS and all ten games. We're a new
+studio, and I'd rather say that plainly than inflate a résumé.`
 
 ## 8 — Honest status
-The engine is built and verified; **all six games are playable today.** In progress before
+The engine is built and verified; **all ten games are playable today.** In progress before
 real-money go-live: **accredited-lab certification and B2B licensing** — which is exactly
 why your program is the right partner. We bring the games and the tech; you bring the
 certified platform and distribution.
@@ -73,4 +76,4 @@ we need to align scope and timeline.
 ## 10 — Close
 **Clutch Studios**
 Play it now → **clutchstudios.co/play** · Flagship → **/zenith/** · Verify fairness → **/fairness**
-`[Founder name]` · **team@clutchstudios.co** · clutchstudios.co
+`Ali Z` · **partnership@clutchstudios.co** · clutchstudios.co

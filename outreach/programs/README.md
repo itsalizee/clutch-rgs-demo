@@ -16,7 +16,7 @@ flagship + a working provably-fair RGS. That's the trade.
 
 ## Our unfair advantage in the application
 Most new studios apply with a deck and a promise. **We apply with a link.** An evaluator
-can play **six provably-fair games — including a differentiated flagship — in 60 seconds:**
+can play **ten provably-fair games — including a differentiated flagship — in 60 seconds:**
 - **All games:** https://clutch-rgs-demo.onrender.com  ·  clutchstudios.co/play
 - **Flagship — Zenith** (shared-round vertical climb): https://clutch-rgs-demo.onrender.com/zenith/
 - **Verify fairness live:** `/fairness`, `/fairness/cross`, `/fairness/vault`
@@ -36,7 +36,7 @@ can play **six provably-fair games — including a differentiated flagship — i
 ## The 6-step application playbook
 1. **Fill the placeholders** — everywhere you see `[BRACKETS]` (founder name/bio, entity,
    jurisdiction, contact). Do **not** invent traction, team, cert, or awards.
-2. **Warm the demo link** and confirm all six games load.
+2. **Warm the demo link** and confirm all ten games load.
 3. **Find the contact** — Relax: partnerships/Silver Bullet via relax-gaming.com/partners;
    Pariplay: Ignite via pariplayltd.com. Also catch them at ICE/SiGMA/SBC.
 4. **Send the cover email** (in each program file) with the demo link + a 1-page PDF of
@@ -50,4 +50,4 @@ can play **six provably-fair games — including a differentiated flagship — i
 > *"A new studio that already shipped a differentiated, provably-fair flagship and a full
 > server-authoritative RGS — playable right now. We want [program] to take it to market."*
 
-Contact on everything: **team@clutchstudios.co** · clutchstudios.co
+Contact on everything: **partnership@clutchstudios.co** · clutchstudios.co

@@ -125,8 +125,10 @@ const $=(id)=>document.getElementById(id);
 
 /* ===== scene: vertical neon ascent ===== */
 const canvas=$("c");
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const MOBILE=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||matchMedia('(max-width:820px)').matches||(navigator.deviceMemory&&navigator.deviceMemory<=4);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!MOBILE});
+renderer.setPixelRatio(Math.min(devicePixelRatio,MOBILE?1.5:2));
+canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();},false);
 renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.12;
 const scene=new THREE.Scene();
 // vertical gradient sky (deep indigo → near-black) as an equirect background
@@ -263,7 +265,7 @@ function frame(){ requestAnimationFrame(frame);
   if(fovKick>0.001){ fovKick*=0.86; } else fovKick=0;
   camera.fov += ((64+Math.min(10,climbSpeed*6)-fovKick*3.5)-camera.fov)*0.18; camera.updateProjectionMatrix();
   camera.lookAt(0, climberScreenY+2, 0);
-  composer.render();
+  if(MOBILE) renderer.render(scene,camera); else composer.render();
 }
 frame();
 const setAlt=(m)=>{ $("alt").textContent=Math.round(multToWorld(m)*12); };

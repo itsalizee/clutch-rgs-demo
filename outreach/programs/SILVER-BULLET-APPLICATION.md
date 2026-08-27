@@ -13,7 +13,7 @@ distribution** — while we bring a differentiated, ready-to-play flagship and a
 
 ## Our fit, in one paragraph
 Clutch is a new studio that has **already shipped** a differentiated provably-fair flagship
-(**Zenith**, a shared-round vertical climb) plus five more live games across three mechanics —
+(**Zenith**, a shared-round vertical climb) plus nine more live games across seven mechanics —
 all playable in a browser today, on our own server-authoritative RGS. We're not asking Silver
 Bullet to bet on a concept; we're asking it to take **finished, verifiable games** to market.
 
@@ -42,12 +42,14 @@ Hi `[First name]`,
 Is Relax's **Silver Bullet** program open to a new studio with games that are already built
 and playable?
 
-I'm `[Founder name]`, founder of **Clutch Studios**. We've shipped a differentiated,
+I'm `Ali Z`, founder of **Clutch Studios**. We've shipped a differentiated,
 provably-fair flagship — **Zenith**, a *shared-round vertical climb* (one climber, everyone in
-the round, secure before the fall) — plus five more live games across crash, step-multiplier,
-and mines. **You can play all of them in a browser right now, no signup:**
+the round, secure before the fall) — plus nine more live games across crash, step-multiplier,
+mines, plinko, originals, and slots. **You can play all of them in a browser right now, no signup:**
 
-▶ **https://clutchstudios.co/play**  (flagship: **/zenith/** · verify fairness: **/fairness**)
+▶ All ten: **https://clutchstudios.co/play**
+▶ Flagship (Zenith): **https://clutch-rgs-demo.onrender.com/zenith/**
+▶ Verify fairness: **https://clutch-rgs-demo.onrender.com/fairness**
 
 Everything runs on our own **server-authoritative, provably-fair RGS** (built to certify).
 We're a new studio without our own certification/licence yet — which is exactly why Silver
@@ -58,4 +60,4 @@ Worth a 30-minute call? I'll walk you through Zenith live and the "one integrati
 catalogue" story. Happy to send our deck and a technical overview.
 
 Best,
-`[Founder name]` · Clutch Studios · team@clutchstudios.co · clutchstudios.co
+`Ali Z` · Clutch Studios · partnership@clutchstudios.co · clutchstudios.co

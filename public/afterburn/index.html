@@ -298,37 +298,39 @@ function draw(t){
   requestAnimationFrame(draw);
 }
 function drawJet(x,y,ang,col){
-  ctx.save();ctx.translate(x,y);ctx.rotate(ang);
-  const C=rgb(col);
-  const wings=[[-23,-16],[-23,16],[-16,-8],[-16,8]];
-  // engine afterburner flames (behind the hull)
-  ctx.shadowColor=C;ctx.shadowBlur=16;
-  for(const ey of [-7,-2.6,2.6,7]){
-    const fl=ctx.createLinearGradient(-13,0,-32,0);
-    fl.addColorStop(0,C); fl.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
-    ctx.fillStyle=fl; ctx.beginPath(); ctx.moveTo(-13,ey-1.5); ctx.lineTo(-30-Math.random()*5,ey); ctx.lineTo(-13,ey+1.5); ctx.closePath(); ctx.fill();
-  }
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang); ctx.scale(1.4,1.4); ctx.lineJoin='round';
+  const C=rgb(col), soft=`rgba(${col[0]},${col[1]},${col[2]},0)`;
+  // afterburner plume — white-hot core fading to heat colour
+  ctx.shadowColor=C; ctx.shadowBlur=20;
+  const fl=ctx.createLinearGradient(-11,0,-42,0);
+  fl.addColorStop(0,'#ffffff'); fl.addColorStop(.2,C); fl.addColorStop(1,soft);
+  ctx.fillStyle=fl; ctx.beginPath(); ctx.moveTo(-11,-4);
+  ctx.quadraticCurveTo(-27,0,-40-Math.random()*8,0); ctx.quadraticCurveTo(-27,0,-11,4); ctx.closePath(); ctx.fill();
   ctx.shadowBlur=0;
-  // X-foil wings
-  ctx.lineCap='round';
-  ctx.strokeStyle='#39425a'; ctx.lineWidth=3.4;
-  for(const [wx,wy] of wings){ ctx.beginPath(); ctx.moveTo(-5,0); ctx.lineTo(wx,wy); ctx.stroke(); }
-  // wingtip cannons + red stripes (starfighter markings)
-  ctx.strokeStyle='#8b97b2'; ctx.lineWidth=1.5;
-  for(const [wx,wy] of wings){ ctx.beginPath(); ctx.moveTo(wx,wy); ctx.lineTo(wx-7,wy+(wy<0?-1.5:1.5)); ctx.stroke(); }
-  ctx.strokeStyle='#ff3653'; ctx.lineWidth=1.7;
-  for(const [wx,wy] of wings){ ctx.beginPath(); ctx.moveTo(-5,0); ctx.lineTo((-5+wx)/2,wy/2); ctx.stroke(); }
-  // fuselage
-  ctx.beginPath(); ctx.moveTo(21,0); ctx.lineTo(10,-3.3); ctx.lineTo(-13,-4.2); ctx.lineTo(-15,0); ctx.lineTo(-13,4.2); ctx.lineTo(10,3.3); ctx.closePath();
-  const fg=ctx.createLinearGradient(0,-4,0,4); fg.addColorStop(0,'#f4f8ff'); fg.addColorStop(.5,'#c9d4e8'); fg.addColorStop(1,'#8b99b6');
-  ctx.fillStyle=fg; ctx.shadowColor=C; ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0;
-  // nose cone (red) + cockpit canopy (cyan glass)
-  ctx.beginPath(); ctx.moveTo(21,0); ctx.lineTo(11,-2.5); ctx.lineTo(11,2.5); ctx.closePath(); ctx.fillStyle='#ff5a3c'; ctx.fill();
-  ctx.beginPath(); ctx.ellipse(2,-1.6,5,2.7,0,0,6.28); ctx.fillStyle='rgba(90,224,255,.9)'; ctx.fill();
-  // four engine glows
-  ctx.shadowColor=C; ctx.shadowBlur=10; ctx.fillStyle=C;
-  for(const ey of [-7,-2.6,2.6,7]){ ctx.beginPath(); ctx.arc(-13,ey,1.8,0,6.28); ctx.fill(); }
-  ctx.shadowBlur=0; ctx.restore();
+  // swept delta wings (solid metal) with lit leading edges
+  ctx.fillStyle='#2c3450';
+  ctx.beginPath(); ctx.moveTo(1,-2.6); ctx.lineTo(-20,-16); ctx.lineTo(-13,-2.6); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(1,2.6); ctx.lineTo(-20,16); ctx.lineTo(-13,2.6); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='rgba(180,196,230,.7)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(1,-2.6); ctx.lineTo(-20,-16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(1,2.6); ctx.lineTo(-20,16); ctx.stroke();
+  // fuselage — sharp dart, metallic top-lit gradient
+  const fg=ctx.createLinearGradient(0,-6,0,6);
+  fg.addColorStop(0,'#ffffff'); fg.addColorStop(.42,'#dbe4f4'); fg.addColorStop(.6,'#b7c2da'); fg.addColorStop(1,'#6d7a9a');
+  ctx.fillStyle=fg; ctx.shadowColor=C; ctx.shadowBlur=6;
+  ctx.beginPath(); ctx.moveTo(24,0); ctx.lineTo(7,-5); ctx.lineTo(-13,-3.7); ctx.lineTo(-15,0); ctx.lineTo(-13,3.7); ctx.lineTo(7,5); ctx.closePath(); ctx.fill();
+  ctx.shadowBlur=0;
+  // top highlight ridge
+  ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(19,-.7); ctx.lineTo(-11,-.7); ctx.stroke();
+  // red nose accent
+  ctx.fillStyle='#ff4436'; ctx.beginPath(); ctx.moveTo(24,0); ctx.lineTo(13,-3); ctx.lineTo(13,3); ctx.closePath(); ctx.fill();
+  // cockpit canopy + glass glint
+  ctx.fillStyle='rgba(120,232,255,.95)'; ctx.beginPath(); ctx.ellipse(7,-.4,4.6,2.5,0,0,6.28); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.75)'; ctx.beginPath(); ctx.ellipse(8.6,-1.2,1.5,.85,0,0,6.28); ctx.fill();
+  // engine core glow (white-hot centre)
+  ctx.shadowColor=C; ctx.shadowBlur=12; ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(-13,0,2.7,0,6.28); ctx.fill();
+  ctx.fillStyle=C; ctx.beginPath(); ctx.arc(-13,0,1.6,0,6.28); ctx.fill(); ctx.shadowBlur=0;
+  ctx.restore();
 }
 function emit(x,y,ang,m){ if(reduce)return; const col=heat(m); const n=1+Math.floor(Math.min(2,Math.log2(m)));
   for(let i=0;i<n;i++)parts.push({x:x-Math.cos(ang)*8,y:y-Math.sin(ang)*8,vx:-Math.cos(ang)*(1.5+Math.random())-.3,vy:-Math.sin(ang)*(1.5+Math.random())+ (Math.random()-.5),

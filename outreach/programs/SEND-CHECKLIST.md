@@ -8,9 +8,9 @@ Work top to bottom. Check the boxes.
 ## STEP 0 — Fill 3 things (5 min)
 Open these and replace every `[BRACKET]`. **Invent nothing** (no fake team, traction, cert).
 
-- [ ] `programs/STUDIO-DECK.md` and `Clutch-Studios-Deck.pptx` — `[Founder name]`, `[one honest bio line]`
-- [ ] `programs/SILVER-BULLET-APPLICATION.md` + `IGNITE-APPLICATION.md` — `[First name]`, `[Founder name]` in the cover emails
-- [ ] Confirm the contact address on everything is right: **team@clutchstudios.co**
+- [ ] `programs/STUDIO-DECK.md` and `Clutch-Studios-Deck.pptx` — `Ali Z`, `[one honest bio line]`
+- [ ] `programs/SILVER-BULLET-APPLICATION.md` + `IGNITE-APPLICATION.md` — `[First name]`, `Ali Z` in the cover emails
+- [ ] Confirm the contact address on everything is right: **partnership@clutchstudios.co**
 
 Your honest bio line, if you're solo & new (this is *stronger* than a fake résumé):
 > "Independent founder — I designed and built the RGS and all ten games."
@@ -59,7 +59,7 @@ For **each** program, send its cover email (already written in its `*-APPLICATIO
 > "We're a new studio, but we've already shipped **ten provably-fair games — including a differentiated flagship, Zenith — all playable in a browser right now.** They run on our own server-authoritative, built-to-certify RGS. We bring the games and the tech; we're looking to [Silver Bullet / Ignite] for the certified platform and distribution."
 
 ## What's true (so you never overstate)
-- ✅ 10 live games, 6 mechanics, one integration, provably fair, playable now
+- ✅ 10 live games, 7 mechanics, one integration, provably fair, playable now
 - ✅ Server-authoritative RGS, built to certify (deterministic replay, audit logs, RTP harness)
 - ⏳ NOT yet: lab certification, B2B licence — *that's what the program is for.* Say so plainly.
 

@@ -32,7 +32,7 @@ pricing accordingly.
 **"How long is integration?"**
 One REST + WebSocket + seamless-wallet contract. We build a per-aggregator adapter that maps
 to *your* wallet API — debit/credit/rollback, idempotent by txId, integer minor units, with
-auto-reconciliation. Sandbox first; all five games ship on the same integration.
+auto-reconciliation. Sandbox first; all ten games ship on the same integration.
 
 **"How do you prove fairness?"**
 Live, in the demo: /fairness and /fairness/cross. The server seed is committed (a published
@@ -56,10 +56,11 @@ cert deployment; we'll run the system the lab audits.
 
 **"Why crash / why these games?"**
 Crash is the fastest-growing category — mobile-first, high-frequency, social — and most
-catalogues have only one or two titles. We ship **five games across three mechanics** on one
-engine: crash (Ascent, Overdrive), step-multiplier (Ascent Cross, Redline), and mines (Vault).
-That's three distinct player audiences from a single integration — and more titles ship on
-the same pipe.
+catalogues have only one or two titles. We ship **ten games across seven mechanics** on one
+engine: crash (Ascent, Overdrive), shared-round climb (Zenith, our flagship), step-multiplier
+(Ascent Cross), mines (Vault), plinko (Prism), originals (Dice, Limbo, Wheel), and slots
+(Fortune Reels). That's the crash crowd, the instant-pick crowd, and the slots crowd — several
+distinct player audiences from a single integration, with more titles shipping on the same pipe.
 
 **"What do you need from us?"**
 A sandbox and a short technical spec of your wallet API, and alignment on commercials. We
@@ -70,6 +71,6 @@ the moment it does.
 
 ## The three things to always land on a call
 1. **Play it** — the demo does more than any slide.
-2. **One integration, two (soon more) games** — the compounding value.
+2. **One integration, ten games (and counting)** — the compounding value.
 3. **Honest status** — built, verifiable, certifying now; founding-partner terms for
    moving early.

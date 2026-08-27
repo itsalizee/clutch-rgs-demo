@@ -28,16 +28,16 @@ s.addText([{text:"CLUTCH ",options:{color:P.cyan}},{text:"STUDIOS",options:{colo
   {x:M,y:2.25,w:11.9,h:1.3,margin:0,fontFace:HEAD,fontSize:60,bold:true,charSpacing:1});
 s.addText("Provably-fair instant games — server-authoritative, and built to certify.",
   {x:M,y:3.55,w:11,h:0.6,margin:0,fontFace:BODY,fontSize:22,color:P.white});
-s.addText("Six live games. Three mechanics. One integration. Playable right now.",
+s.addText("Ten live games. Seven mechanics. One integration. Playable right now.",
   {x:M,y:4.15,w:11,h:0.5,margin:0,fontFace:BODY,fontSize:16,color:P.muted});
 s.addText([{text:"▶  Play the whole catalogue in 60 seconds  ",options:{color:P.cyan}},{text:"clutchstudios.co/play",options:{color:P.white,bold:true}}],
   {x:M,y:5.35,w:11,h:0.45,margin:0,fontFace:MONO,fontSize:14});
-s.addText("[Founder name] · team@clutchstudios.co",{x:M,y:6.55,w:11,h:0.4,margin:0,fontFace:MONO,fontSize:12,color:P.dim});
+s.addText("Ali Z · partnership@clutchstudios.co",{x:M,y:6.55,w:11,h:0.4,margin:0,fontFace:MONO,fontSize:12,color:P.dim});
 
 /* 2 — ONE-LINER */
 s=pres.addSlide(); bg(s); glow(s,10.5,-2,6,P.purple,90);
 label(s,"What we do",M,0.75);
-s.addText([{text:"Six live games. ",options:{color:P.white}},{text:"Three mechanics. ",options:{color:P.cyan}},{text:"One integration.",options:{color:P.purple}}],
+s.addText([{text:"Ten live games. ",options:{color:P.white}},{text:"Seven mechanics. ",options:{color:P.cyan}},{text:"One integration.",options:{color:P.purple}}],
   {x:M,y:1.25,w:12,h:1.5,margin:0,fontFace:HEAD,fontSize:44,bold:true,lineSpacingMultiple:1.02});
 s.addText("We build crash and instant games for the operators your network serves — mobile-first, provably fair, and verifiable every round. All of it runs on one server-authoritative RGS, on one integration, and you can play every title in a browser today.",
   {x:M,y:3.35,w:11.5,h:1.5,margin:0,fontFace:BODY,fontSize:19,color:P.white,lineSpacingMultiple:1.15});
@@ -74,17 +74,24 @@ s.addText("ALTITUDE = MULTIPLIER",{x:cx,y:5.95,w:cw,h:0.4,margin:0,align:"center
 s=pres.addSlide(); bg(s); glow(s,11,5.5,5,P.pink,91);
 label(s,"The catalogue",M,0.7);
 s.addText("Range from one supplier",{x:M,y:1.1,w:11,h:0.7,margin:0,fontFace:HEAD,fontSize:36,bold:true,color:P.white});
+const mono12=(t)=>({text:t,options:{fill:{color:P.panel},color:P.cyan,bold:true,fontFace:MONO,fontSize:12}});
+const mech=(t)=>({text:t,options:{color:P.white,bold:true,fontSize:14}});
+const titl=(t)=>({text:t,options:{color:P.muted,fontSize:13}});
 const rows=[
-  [{text:"MECHANIC",options:{fill:{color:P.panel},color:P.cyan,bold:true,fontFace:MONO,fontSize:12}},{text:"TITLES",options:{fill:{color:P.panel},color:P.cyan,bold:true,fontFace:MONO,fontSize:12}}],
-  [{text:"Crash",options:{color:P.white,bold:true,fontSize:17}},{text:"Ascent  ·  Overdrive (3D turbo car-crash)",options:{color:P.muted,fontSize:16}}],
-  [{text:"Step-multiplier climb",options:{color:P.white,bold:true,fontSize:17}},{text:"Zenith  (flagship)  ·  Ascent Cross  ·  Redline",options:{color:P.muted,fontSize:16}}],
-  [{text:"Mines",options:{color:P.white,bold:true,fontSize:17}},{text:"Vault  (25-tile, player-set volatility)",options:{color:P.muted,fontSize:16}}],
+  [mono12("MECHANIC"),mono12("TITLES")],
+  [mech("Shared-round climb"),titl("Zenith  (flagship — one climber, the whole round watches)")],
+  [mech("Crash"),titl("Ascent  (multiplayer, Moon Pool)  ·  Overdrive (3D turbo car-crash)")],
+  [mech("Step-multiplier"),titl("Ascent Cross  (climb platform by platform, one hidden lane)")],
+  [mech("Mines"),titl("Vault  (25-tile grid, player-set volatility)")],
+  [mech("Plinko"),titl("Prism  (pick your risk & rows, up to 1000×)")],
+  [mech("Originals"),titl("Dice  ·  Limbo  ·  Wheel  (instant one-tap classics)")],
+  [mech("Slots"),titl("Fortune Reels  (3-reel, wilds, jackpot line)")],
 ];
-s.addTable(rows,{x:M,y:2.2,w:11.9,colW:[3.6,8.3],rowH:[0.5,0.85,0.85,0.85],fill:{color:P.panel2},
-  border:{type:"solid",color:P.line,pt:1},valign:"middle",margin:[4,10,4,10]});
-card(s,M,6.25,11.9,0.75,P.panel);
-s.addText([{text:"One onboarding, three player audiences.  ",options:{color:P.white,bold:true}},{text:"Adding the next title is a config change, not a new integration.",options:{color:P.muted}}],
-  {x:M+0.4,y:6.42,w:11.2,h:0.4,margin:0,fontFace:BODY,fontSize:15});
+s.addTable(rows,{x:M,y:1.85,w:11.9,colW:[3.4,8.5],rowH:[0.4,0.6,0.6,0.6,0.6,0.6,0.6,0.6],fill:{color:P.panel2},
+  border:{type:"solid",color:P.line,pt:1},valign:"middle",margin:[3,10,3,10]});
+card(s,M,6.6,11.9,0.7,P.panel);
+s.addText([{text:"One onboarding, several player audiences.  ",options:{color:P.white,bold:true}},{text:"Adding the next title is a config change, not a new integration.",options:{color:P.muted}}],
+  {x:M+0.4,y:6.75,w:11.2,h:0.4,margin:0,fontFace:BODY,fontSize:15});
 
 /* 5 — TECHNOLOGY */
 s=pres.addSlide(); bg(s); glow(s,-1.5,-1.5,5,P.cyan,90);
@@ -122,10 +129,10 @@ s=pres.addSlide(); bg(s); glow(s,11,-2,6,P.cyan,90);
 label(s,"The team",M,0.75);
 s.addText("Small, technical, shipping.",{x:M,y:1.25,w:11,h:0.8,margin:0,fontFace:HEAD,fontSize:38,bold:true,color:P.white});
 card(s,M,2.5,11.9,3.4,P.panel);
-s.addText("[Founder name] — Founder",{x:M+0.5,y:2.85,w:11,h:0.5,margin:0,fontFace:HEAD,fontSize:22,bold:true,color:P.cyan});
-s.addText("[One honest line about who you are and any real, verifiable background. If you're solo and new, say so plainly — e.g. “Independent founder; designed and built the RGS and all six games.” A true, modest line beats an inflated résumé.]",
+s.addText("Ali Z — Founder",{x:M+0.5,y:2.85,w:11,h:0.5,margin:0,fontFace:HEAD,fontSize:22,bold:true,color:P.cyan});
+s.addText("Independent founder. I designed and built the RGS and all ten games. We're a new studio, and I'd rather say that plainly than inflate a résumé.",
   {x:M+0.5,y:3.45,w:11,h:1.4,margin:0,fontFace:BODY,fontSize:17,color:P.muted,italic:true,lineSpacingMultiple:1.2});
-s.addText("Replace this slide's bracketed text before sending. Do not invent a team or credentials.",
+s.addText("The product and the fairness math are the credentials — play it, then verify it.",
   {x:M+0.5,y:5.25,w:11,h:0.4,margin:0,fontFace:MONO,fontSize:11,color:P.dim});
 
 /* 8 — HONEST STATUS */
@@ -137,7 +144,7 @@ card(s,M,2.2,colW,3.4,P.panel);
 s.addText("BUILT & PLAYABLE TODAY",{x:M+0.4,y:2.45,w:colW-0.8,h:0.4,margin:0,fontFace:MONO,fontSize:12,color:P.green,charSpacing:2,bold:true});
 s.addText([
   {text:"A server-authoritative, provably-fair RGS",options:{color:P.white,bullet:{indent:14},breakLine:true}},
-  {text:"Six live games across three mechanics",options:{color:P.white,bullet:{indent:14},breakLine:true}},
+  {text:"Ten live games across seven mechanics",options:{color:P.white,bullet:{indent:14},breakLine:true}},
   {text:"A differentiated flagship (Zenith)",options:{color:P.white,bullet:{indent:14},breakLine:true}},
   {text:"Seamless-wallet contract + RTP harness",options:{color:P.white,bullet:{indent:14},breakLine:true}},
   {text:"Deterministic replay + audit logs",options:{color:P.white,bullet:{indent:14}}},
@@ -163,7 +170,7 @@ card(s,M,3.65,5.75,2.7,P.panel);
 s.addText("WE BRING",{x:M+0.4,y:3.9,w:5,h:0.4,margin:0,fontFace:MONO,fontSize:12,color:P.cyan,charSpacing:2,bold:true});
 s.addText([
   {text:"A differentiated, playable flagship",options:{color:P.white,bullet:{indent:14},breakLine:true}},
-  {text:"Six games on one integration",options:{color:P.white,bullet:{indent:14},breakLine:true}},
+  {text:"Ten games on one integration",options:{color:P.white,bullet:{indent:14},breakLine:true}},
   {text:"A built-to-certify, provably-fair RGS",options:{color:P.white,bullet:{indent:14}}},
 ],{x:M+0.4,y:4.4,w:5,h:1.8,margin:0,fontFace:BODY,fontSize:15,lineSpacingMultiple:1.15,paraSpaceAfter:7});
 card(s,M+6.15,3.65,5.75,2.7,P.panel);
@@ -180,11 +187,11 @@ s=pres.addSlide(); bg(s);
 glow(s,-1.6,-1.8,6,P.cyan,86); glow(s,9.5,4.5,7,P.purple,87); glow(s,6,-2,5,P.pink,90);
 s.addText("Play it now.",{x:M,y:1.9,w:12,h:1.1,margin:0,fontFace:HEAD,fontSize:56,bold:true,color:P.white});
 s.addText([
-  {text:"All six games   ",options:{color:P.muted}},{text:"clutchstudios.co/play",options:{color:P.cyan,bold:true,breakLine:true}},
+  {text:"All ten games   ",options:{color:P.muted}},{text:"clutchstudios.co/play",options:{color:P.cyan,bold:true,breakLine:true}},
   {text:"Flagship   ",options:{color:P.muted}},{text:"clutch-rgs-demo.onrender.com/zenith",options:{color:P.cyan,bold:true,breakLine:true}},
   {text:"Verify fairness   ",options:{color:P.muted}},{text:"/fairness · /fairness/cross · /fairness/vault",options:{color:P.cyan,bold:true}},
 ],{x:M,y:3.35,w:12,h:1.6,margin:0,fontFace:MONO,fontSize:16,lineSpacingMultiple:1.5});
-s.addText([{text:"CLUTCH ",options:{color:P.cyan}},{text:"STUDIOS",options:{color:P.purple}},{text:"   ·   [Founder name]   ·   team@clutchstudios.co",options:{color:P.muted}}],
+s.addText([{text:"CLUTCH ",options:{color:P.cyan}},{text:"STUDIOS",options:{color:P.purple}},{text:"   ·   Ali Z   ·   partnership@clutchstudios.co",options:{color:P.muted}}],
   {x:M,y:5.9,w:12,h:0.5,margin:0,fontFace:HEAD,fontSize:20,bold:true});
 
 pres.writeFile({ fileName: path.join(__dirname,"Clutch-Studios-Deck.pptx") }).then(f=>console.log("wrote",f));

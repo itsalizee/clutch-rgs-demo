@@ -52,8 +52,8 @@ client-side). We'll map to your RG and jurisdictional requirements. We're candid
 games are engaging by design, and we take player-protection seriously.
 
 **"Team?"**
-`[Answer honestly — who built this, any real background. If solo: "Independent founder; I built
-the RGS and all six games." Do not invent a team.]`
+"Independent founder — I'm Ali Z; I designed and built the RGS and all ten games. We're a
+new studio and I won't pretend to be a bigger team than we are."
 
 **"Commercials — revenue share, exclusivity?"**
 Standard content revenue-share, founding-partner terms, flexible to your model. Open to
@@ -72,5 +72,5 @@ operators your program unlocks.
 
 ## The three things to land on any call
 1. **Play Zenith** — the flagship does more than any slide.
-2. **One integration, six games, three mechanics, built-to-certify** — range + readiness.
+2. **One integration, ten games, seven mechanics, built-to-certify** — range + readiness.
 3. **Honest status** — new studio, finished product, here for your cert + distribution.

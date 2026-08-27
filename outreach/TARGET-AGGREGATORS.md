@@ -28,8 +28,9 @@ sometimes certification/compliance. Best-fit for a pre-cert studio with a strong
 | **Yggdrasil — YGS Masters / GATI** | Franchise + tech-stack (GATI) that helps studios build to a pre-certified compliance standard and distribute. |
 | **Swintt / Kalamba / other "partner studio" tracks** | Several mid-size suppliers run partner-studio programs — worth a scan for open onboarding. |
 
-**Angle for Tier 1:** "New studio, two live provably-fair games on one engine, built to
-certify — is your studio program open? Here's a link to play both right now."
+**Angle for Tier 1:** "New studio, ten live provably-fair games on one engine — including a
+differentiated flagship (Zenith) — built to certify. Is your studio program open? Here's a
+link to play them all right now."
 
 ## Tier 2 — Crypto-forward aggregators (fast, sandbox-friendly)
 Often quicker to sandbox-integrate and more comfortable with a Curaçao path and crash/
@@ -42,8 +43,9 @@ instant content. Good for early momentum and crypto-casino distribution.
 | **Slotegrator (APIgrator / GamesHub)** | Aggregates many newer studios; works with emerging providers; crypto-friendly. |
 | **NuxGame / Turbo-adjacent hubs** | Turnkey + aggregation for crypto casinos; crash content is in demand. |
 
-**Angle for Tier 2:** "Crash + a new step-multiplier title, server-authoritative and
-provably fair, one integration. Your operators are asking for fresh crash — play it."
+**Angle for Tier 2:** "Crash, slots, plinko and more — ten titles across seven mechanics,
+server-authoritative and provably fair, one integration. Your operators are asking for fresh
+crash — play it."
 
 ## Tier 3 — Large full-stack aggregators (broad reach, longer process)
 Biggest operator reach, but more process and usually cert/license required up front.

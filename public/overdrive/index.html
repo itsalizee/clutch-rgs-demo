@@ -122,8 +122,10 @@ const $=(id)=>document.getElementById(id);
 
 /* ================= 3D scene ================= */
 const canvas=$("c");
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const MOBILE=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||matchMedia('(max-width:820px)').matches||(navigator.deviceMemory&&navigator.deviceMemory<=4);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:!MOBILE});
+renderer.setPixelRatio(Math.min(devicePixelRatio,MOBILE?1.5:2));
+canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();},false);
 renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.15;
 const scene=new THREE.Scene(); scene.background=new THREE.Color(0x070912);
 scene.fog=new THREE.FogExp2(0x0a0e1e, 0.0105);
@@ -212,7 +214,7 @@ function frame(){ requestAnimationFrame(frame);
   camera.position.x=car.position.x*0.7;
   const fov=64+Math.min(20,speed*0.18); camera.fov+=(fov-camera.fov)*0.1; camera.updateProjectionMatrix();
   if(shake>0){ camera.position.x+=(Math.random()-.5)*shake; camera.position.y=2.9+(Math.random()-.5)*shake; shake*=0.9; if(shake<0.01)shake=0; } else camera.position.y+=(2.9-camera.position.y)*0.1;
-  camera.lookAt(car.position.x,0.85,-9); composer.render(); }
+  camera.lookAt(car.position.x,0.85,-9); if(MOBILE) renderer.render(scene,camera); else composer.render(); }
 frame();
 const setSpeedHud=(m)=>{ $("spd").textContent=Math.max(0,Math.round(60+(m-1)*90)); };
 
