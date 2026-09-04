@@ -53,6 +53,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-o
 .status{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mut);margin-bottom:2px;
   text-shadow:0 2px 8px #000;min-height:15px}
 .mult{font-family:var(--disp);font-weight:700;line-height:.9;font-size:clamp(2.7rem,9vw,6rem);letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;
   text-shadow:0 0 14px currentColor,0 4px 14px rgba(0,0,0,.55);transition:transform .1s}
 .mult.pop{animation:pop .3s cubic-bezier(.2,1.4,.35,1)}
 @keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.09)}100%{transform:scale(1)}}
@@ -462,7 +463,7 @@ function flyLoop(){ if(G.phase!=='flying'){ flyRAF=0; return; }
   const yFrac=clamp(Math.log(G.mult)/Math.log(G.viewCeil),0,1); const xFrac=1-Math.exp(-el/3000);
   const x=ox+(tx-ox)*xFrac, y=baseY-(baseY-topY)*yFrac;
   trail.push({x,y}); if(trail.length>240)trail.shift();
-  if(trail.length>1){ const a=trail[trail.length-2]; G.jetAng=Math.atan2(y-a.y,x-a.x); }
+  if(trail.length>1){ const a=trail[Math.max(0,trail.length-6)]; const ta=Math.atan2(y-a.y,x-a.x); G.jetAng += (ta-G.jetAng)*0.2; }
   emit(x,y,G.jetAng,G.mult);
   const col=heat(G.mult); const mEl=$('mult'); mEl.style.color=rgb(col); mEl.textContent=G.mult.toFixed(2)+'×';
   Snd.enginePitch(G.mult);
