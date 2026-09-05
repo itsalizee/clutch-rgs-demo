@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Fortune Reels — provably-fair slots</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
-  :root{ --c1:#22D3EE;--c2:#8B3FFF;--gold:#FFD23F;--green:#2BFF88;--rug:#FF3653;--text:#f4f7ff;--muted:#93a0ba;--glass:rgba(12,15,26,.66);--line:rgba(255,255,255,.12);--display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace; }
-  *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden}
+  :root{ --c1:#2ee6a0;--c2:#2ee6a0;--gold:#2ee6a0;--green:#2ee6a0;--rug:#ff5069;--text:#eef0f5;--muted:#868c9c;--glass:#15171d;--line:#272b34;--display:'Inter',system-ui,sans-serif;--mono:'Inter',system-ui,sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0;font-variant-numeric:tabular-nums} html,body{height:100%;overflow:hidden}
   body{font-family:var(--display);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;touch-action:manipulation;
-    background:radial-gradient(circle at 14% 8%,rgba(255,210,63,.14),transparent 45%),radial-gradient(circle at 86% 4%,rgba(139,63,255,.16),transparent 45%),#05060f}
+    background:#0d0e12}
   .app{max-width:640px;margin:0 auto;padding:16px 16px 20px;display:flex;flex-direction:column;min-height:100vh}
   .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .logo{font-weight:700;font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,var(--gold),var(--c2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -19,16 +19,16 @@
   .mute{cursor:pointer;font-family:var(--mono);font-size:15px;color:var(--muted);background:var(--glass);border:1px solid var(--line);border-radius:10px;width:34px;height:30px;display:flex;align-items:center;justify-content:center}
   .bal{text-align:right;font-family:var(--mono)}.bal .v{font-size:20px;color:#fff}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
   .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:6px 0}
-  .machine{position:relative;width:100%;max-width:420px;border-radius:22px;padding:16px;background:linear-gradient(180deg,#151826,#0c0e18);border:1px solid var(--line);
-    box-shadow:0 24px 60px -24px rgba(139,63,255,.5),inset 0 1px 0 rgba(255,255,255,.06)}
+  .machine{position:relative;width:100%;max-width:420px;border-radius:22px;padding:16px;background:var(--panel);border:1px solid var(--line);
+    box-shadow:0 24px 60px -24px rgba(46,230,160,.5),inset 0 1px 0 rgba(255,255,255,.06)}
   .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;position:relative}
-  .reel{position:relative;height:min(43vw,190px);overflow:hidden;border-radius:14px;background:linear-gradient(180deg,#0a0c16,#12151f);border:1px solid rgba(255,255,255,.08);
+  .reel{position:relative;height:min(43vw,190px);overflow:hidden;border-radius:14px;background:var(--panel2);border:1px solid rgba(255,255,255,.08);
     box-shadow:inset 0 12px 20px -10px rgba(0,0,0,.9),inset 0 -12px 20px -10px rgba(0,0,0,.9)}
   .strip{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;align-items:center;will-change:transform}
   .cell{height:calc(min(43vw,190px)/3);display:flex;align-items:center;justify-content:center;font-size:min(13vw,58px);line-height:1}
   .payline{position:absolute;left:8px;right:8px;top:50%;height:calc(min(43vw,190px)/3);transform:translateY(-50%);border-radius:12px;
-    border:2px solid rgba(255,210,63,.55);box-shadow:0 0 22px rgba(255,210,63,.35);pointer-events:none;z-index:3;transition:border-color .2s,box-shadow .2s}
-  .payline.win{border-color:var(--green);box-shadow:0 0 30px rgba(43,255,136,.6)}
+    border:2px solid rgba(46,230,160,.55);box-shadow:0 0 10px rgba(46,230,160,.35);pointer-events:none;z-index:3;transition:border-color .2s,box-shadow .2s}
+  .payline.win{border-color:var(--green);box-shadow:0 0 12px rgba(46,230,160,.6)}
   .glass{position:absolute;inset:0;pointer-events:none;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.10),transparent 22%,transparent 78%,rgba(0,0,0,.35));z-index:2}
   .cell.hit{animation:pop .5s ease}
   @keyframes pop{0%,100%{transform:scale(1)}45%{transform:scale(1.18);filter:drop-shadow(0 0 14px var(--green))}}
@@ -43,7 +43,7 @@
   .field label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
   .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none;min-width:0}
   .chips{display:flex;gap:6px} .chip2{font-family:var(--mono);font-size:12px;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:9px;padding:6px 9px;cursor:pointer}
-  button.go{border:none;border-radius:16px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:20px;color:#231a00;background:linear-gradient(135deg,var(--gold),#ffb01f);min-height:56px}
+  button.go{border:none;border-radius:16px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:20px;color:#08130e;background:var(--acc);min-height:56px}
   button.go:disabled{opacity:.4}
 </style>
 </head>

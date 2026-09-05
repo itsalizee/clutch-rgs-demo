@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Limbo — provably-fair</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
-  :root{ --c1:#22D3EE;--c2:#8B3FFF;--gold:#FFD23F;--green:#2BFF88;--rug:#FF3653;--text:#f4f7ff;--muted:#93a0ba;--glass:rgba(12,15,26,.66);--line:rgba(255,255,255,.12);--display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace; }
-  *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden}
+  :root{ --c1:#2ee6a0;--c2:#2ee6a0;--gold:#2ee6a0;--green:#2ee6a0;--rug:#ff5069;--text:#eef0f5;--muted:#868c9c;--glass:#15171d;--line:#272b34;--display:'Inter',system-ui,sans-serif;--mono:'Inter',system-ui,sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0;font-variant-numeric:tabular-nums} html,body{height:100%;overflow:hidden}
   body{font-family:var(--display);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;touch-action:manipulation;
-    background:radial-gradient(circle at 14% 8%,rgba(139,63,255,.16),transparent 45%),radial-gradient(circle at 86% 4%,rgba(34,211,238,.16),transparent 45%),#05060f}
+    background:#0d0e12}
   .app{max-width:640px;margin:0 auto;padding:16px 16px 20px;display:flex;flex-direction:column;min-height:100vh}
   .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .logo{font-weight:700;font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,var(--c2),var(--c1));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -20,14 +20,14 @@
   .bal{text-align:right;font-family:var(--mono)}.bal .v{font-size:20px;color:#fff}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
   .hist{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:22px}
   .pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted)}
-  .pill.w{color:var(--green);border-color:rgba(43,255,136,.4)}.pill.l{color:#ff9aa6;border-color:rgba(255,54,83,.35)}
+  .pill.w{color:var(--green);border-color:rgba(46,230,160,.4)}.pill.l{color:#ff9aa6;border-color:rgba(255,54,83,.35)}
   .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;overflow:hidden}
   .rocketlane{position:absolute;left:9%;top:7%;bottom:13%;width:56px;pointer-events:none;z-index:1}
-  .trail{position:absolute;left:20px;bottom:6px;width:8px;height:0;border-radius:8px;background:linear-gradient(180deg,#fff,#FFD23F 30%,#FF7A18 60%,rgba(255,54,83,0));filter:blur(1.5px);opacity:.9}
-  .rocket{position:absolute;left:0;bottom:0;font-size:44px;line-height:1;transform:translateY(0) rotate(-6deg);will-change:transform;filter:drop-shadow(0 0 16px rgba(34,211,238,.6))}
-  .rocket.win{filter:drop-shadow(0 0 26px var(--green))} .rocket.lose{filter:drop-shadow(0 0 22px var(--rug))}
-  .big{font-weight:700;font-size:16vw;line-height:.9;color:#fff;text-shadow:0 0 46px rgba(34,211,238,.4);transition:color .1s;position:relative;z-index:2}
-  .big.win{color:var(--green);text-shadow:0 0 50px var(--green)} .big.lose{color:var(--rug);text-shadow:0 0 50px var(--rug)}
+  .trail{position:absolute;left:20px;bottom:6px;width:8px;height:0;border-radius:8px;background:linear-gradient(180deg,#fff,#2ee6a0 30%,#2ee6a0 60%,rgba(255,54,83,0));filter:blur(1.5px);opacity:.9}
+  .rocket{position:absolute;left:0;bottom:0;font-size:44px;line-height:1;transform:translateY(0) rotate(-6deg);will-change:transform;filter:drop-shadow(0 0 8px rgba(46,230,160,.6))}
+  .rocket.win{filter:drop-shadow(0 0 12px var(--green))} .rocket.lose{filter:drop-shadow(0 0 9px var(--rug))}
+  .big{font-weight:700;font-size:16vw;line-height:.9;color:#fff;text-shadow:0 0 16px rgba(46,230,160,.4);transition:color .1s;position:relative;z-index:2}
+  .big.win{color:var(--green);text-shadow:0 0 16px var(--green)} .big.lose{color:var(--rug);text-shadow:0 0 16px var(--rug)}
   .sub{font-family:var(--mono);font-size:13px;color:var(--muted)}
   .fair{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.6);text-align:center;margin-top:6px}.fair b{color:var(--c1)}.fair .ok{color:var(--green)}
   .dock{margin-top:auto;padding-top:14px;display:flex;flex-direction:column;gap:10px}

@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Wheel — provably-fair</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
-  :root{ --c1:#22D3EE;--c2:#8B3FFF;--gold:#FFD23F;--green:#2BFF88;--rug:#FF3653;--text:#f4f7ff;--muted:#93a0ba;--glass:rgba(12,15,26,.66);--line:rgba(255,255,255,.12);--display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace; }
-  *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%;overflow:hidden}
+  :root{ --c1:#2ee6a0;--c2:#2ee6a0;--gold:#2ee6a0;--green:#2ee6a0;--rug:#ff5069;--text:#eef0f5;--muted:#868c9c;--glass:#15171d;--line:#272b34;--display:'Inter',system-ui,sans-serif;--mono:'Inter',system-ui,sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0;font-variant-numeric:tabular-nums} html,body{height:100%;overflow:hidden}
   body{font-family:var(--display);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;touch-action:manipulation;
-    background:radial-gradient(circle at 14% 8%,rgba(255,210,63,.13),transparent 45%),radial-gradient(circle at 86% 4%,rgba(139,63,255,.16),transparent 45%),#05060f}
+    background:#0d0e12}
   .app{max-width:640px;margin:0 auto;padding:16px 16px 20px;display:flex;flex-direction:column;min-height:100vh}
   .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
   .logo{font-weight:700;font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,var(--gold),var(--c2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -20,7 +20,7 @@
   .bal{text-align:right;font-family:var(--mono)}.bal .v{font-size:20px;color:#fff}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
   .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative}
   canvas{max-width:100%;display:block}
-  .res{position:absolute;top:44%;font-weight:700;font-size:44px;color:#fff;text-shadow:0 0 30px rgba(0,0,0,.8);pointer-events:none;opacity:0;transition:opacity .15s}
+  .res{position:absolute;top:44%;font-weight:700;font-size:44px;color:#fff;text-shadow:0 0 12px rgba(0,0,0,.8);pointer-events:none;opacity:0;transition:opacity .15s}
   .res.show{opacity:1}
   .fair{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.6);text-align:center;margin-top:6px}.fair b{color:var(--c1)}.fair .ok{color:var(--green)}
   .dock{margin-top:auto;padding-top:14px;display:flex;flex-direction:column;gap:10px}
@@ -34,7 +34,7 @@
   .field label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
   .field input{background:transparent;border:none;color:#fff;font-family:var(--mono);font-weight:700;font-size:20px;width:100%;outline:none;min-width:0}
   .chips{display:flex;gap:6px}.chip2{font-family:var(--mono);font-size:12px;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:9px;padding:6px 9px;cursor:pointer}
-  button.go{border:none;border-radius:16px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:20px;color:#2a1400;background:linear-gradient(135deg,var(--gold),#ff9f1c);min-height:56px}
+  button.go{border:none;border-radius:16px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:20px;color:#08130e;background:var(--acc);min-height:56px}
   button.go:disabled{opacity:.4}
 </style>
 </head>
@@ -66,7 +66,7 @@ const Snd=(()=>{let c,m,mut=false;function e(){if(c)return;try{c=new(window.Audi
 let mut=false;$("mute").onclick=()=>{mut=!mut;Snd.e();Snd.mute(mut);$("mute").textContent=mut?"🔇":"🔊";};
 function sz(){ const s=Math.min(innerWidth-40,innerHeight-360,560); cv.width=s*2; cv.height=s*2; cv.style.width=s+"px"; cv.style.height=s+"px"; }
 function segColor(mv){ if(mv===0)return "#1b2338"; if(mv<2)return "#1c6f8f"; if(mv<5)return "#1f8f5a"; return "#c9922a"; }
-function segGlow(mv){ if(mv===0)return "#2a3550"; if(mv<2)return "#22d3ee"; if(mv<5)return "#2bff88"; return "#ffd23f"; }
+function segGlow(mv){ if(mv===0)return "#2a3550"; if(mv<2)return "#2ee6a0"; if(mv<5)return "#2bff88"; return "#ffd23f"; }
 function draw(){ const W=cv.width,cx=W/2,cy=W/2,R=W*0.46; ctx.clearRect(0,0,W,W);
   const N=segments,a=2*Math.PI/N;
   ctx.save(); ctx.translate(cx,cy); ctx.rotate(rot);
@@ -75,7 +75,7 @@ function draw(){ const W=cv.width,cx=W/2,cy=W/2,R=W*0.46; ctx.clearRect(0,0,W,W)
     if(mv>0){ ctx.save(); ctx.rotate((i+0.5)*a); ctx.fillStyle=segGlow(mv); ctx.font=`700 ${Math.max(11,W*0.021)}px 'Space Mono',monospace`; ctx.textAlign="right"; ctx.textBaseline="middle"; ctx.shadowBlur=8; ctx.shadowColor=segGlow(mv); ctx.fillText(mv+"×",R-10,0); ctx.restore(); } }
   ctx.restore();
   // hub
-  ctx.beginPath(); ctx.arc(cx,cy,R*0.16,0,7); ctx.fillStyle="#0a0f1e"; ctx.fill(); ctx.strokeStyle="#22d3ee"; ctx.lineWidth=3; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,R*0.16,0,7); ctx.fillStyle="#0a0f1e"; ctx.fill(); ctx.strokeStyle="#2ee6a0"; ctx.lineWidth=3; ctx.stroke();
   // pointer (top)
   ctx.beginPath(); ctx.moveTo(cx-14,cy-R-2); ctx.lineTo(cx+14,cy-R-2); ctx.lineTo(cx,cy-R+22); ctx.closePath(); ctx.fillStyle="#ffd23f"; ctx.shadowBlur=14; ctx.shadowColor="#ffd23f"; ctx.fill(); ctx.shadowBlur=0;
 }
