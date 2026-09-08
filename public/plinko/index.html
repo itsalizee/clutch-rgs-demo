@@ -5,27 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Prism — provably-fair Plinko</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
-  :root{ --c1:#22D3EE;--c2:#8B3FFF;--pink:#FF2E97;--gold:#FFD23F;--green:#2BFF88;--rug:#FF3653;
-    --text:#f4f7ff;--muted:#93a0ba;--glass:rgba(12,15,26,.62);--line:rgba(255,255,255,.12);
-    --display:'Fredoka',system-ui,sans-serif;--mono:'Space Mono',monospace; }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;overflow:hidden;background:#04050c}
+  :root{ --c1:#2ee6a0;--c2:#2ee6a0;--pink:#2ee6a0;--gold:#2ee6a0;--green:#2ee6a0;--rug:#ff5069;
+    --text:#eef0f5;--muted:#868c9c;--glass:#15171d;--line:#272b34;
+    --display:'Inter',system-ui,sans-serif;--mono:'Inter',system-ui,sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0;font-variant-numeric:tabular-nums}
+  html,body{height:100%;overflow:hidden;background:#0d0e12}
   body{font-family:var(--display);color:var(--text);-webkit-font-smoothing:antialiased;touch-action:manipulation}
   #wrap{position:fixed;inset:0}
   canvas{display:block;width:100%;height:100%}
   .hud{position:absolute;inset:0;pointer-events:none;z-index:5;display:flex;flex-direction:column}
   .top{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px 0}
   .brand{display:flex;flex-direction:column;gap:8px}
-  .logo{font-weight:700;font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,var(--c1),var(--c2) 60%,var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 14px rgba(139,63,255,.5))}
+  .logo{font-weight:700;font-size:22px;letter-spacing:1px;background:linear-gradient(90deg,var(--c1),var(--c2) 60%,var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 14px rgba(46,230,160,.5))}
   .chip{align-self:flex-start;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--muted)}
   .topright{display:flex;align-items:center;gap:10px}
   .mute{pointer-events:auto;cursor:pointer;font-family:var(--mono);font-size:15px;color:var(--muted);background:var(--glass);border:1px solid var(--line);border-radius:10px;width:34px;height:30px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
   .bal{text-align:right;font-family:var(--mono)} .bal .v{font-size:20px;color:#fff;text-shadow:0 2px 10px #000}.bal .u{font-size:10px;color:var(--gold);letter-spacing:1px}
   .hist{display:flex;gap:6px;padding:8px 16px 0;flex-wrap:wrap;max-width:74%}
   .pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--muted)}
-  .pill.mid{color:#9ff0ff;border-color:rgba(34,211,238,.4)} .pill.hi{color:var(--gold);border-color:rgba(255,210,63,.5)} .pill.lo{color:#ff9aa6;border-color:rgba(255,54,83,.35)}
+  .pill.mid{color:#9ff0ff;border-color:rgba(46,230,160,.4)} .pill.hi{color:var(--gold);border-color:rgba(46,230,160,.5)} .pill.lo{color:#ff9aa6;border-color:rgba(255,54,83,.35)}
   .fair{position:absolute;left:16px;bottom:150px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.6);text-shadow:0 1px 4px #000}.fair b{color:var(--c1)}.fair .ok{color:var(--green)}
   .dock{margin-top:auto;pointer-events:none;padding:0 12px 14px;display:flex;flex-direction:column;gap:8px;align-items:center}
   .panel{pointer-events:auto;width:min(680px,94%);background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
@@ -93,7 +93,7 @@ const balls=[], parts=[]; const binFlash=new Array(64).fill(0); let shake=0;
 function spawnBall(res){ balls.push({path:res.path,step:0,t:0,x:nodeX(0,0),y:nodeY(0),col:0,mult:res.multiplier,bin:res.bin,done:false,fade:1,trail:[]}); }
 function burst(x,y,color,n){ for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2,s=(1.5+Math.random()*4)*DPR; parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2*DPR,life:1,color}); } }
 
-function binColor(m){ if(m>=10)return "#FFD23F"; if(m>=2)return "#2BFF88"; if(m>=1)return "#22D3EE"; return "#FF6b7a"; }
+function binColor(m){ if(m>=10)return "#2ee6a0"; if(m>=2)return "#2ee6a0"; if(m>=1)return "#2ee6a0"; return "#FF6b7a"; }
 function frame(){
   requestAnimationFrame(frame);
   const W=BOARD.W,H=BOARD.H; ctx.clearRect(0,0,W,H);
