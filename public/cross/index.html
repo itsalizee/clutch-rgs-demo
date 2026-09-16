@@ -24,10 +24,15 @@
   .pad.hazard .stone{background:radial-gradient(circle at 35% 30%,#301017,#1c0a0f);border-color:var(--rug);box-shadow:0 0 26px rgba(255,80,105,.6)}
   .pad .mult{font-family:var(--mono);font-size:13px;font-weight:700;margin-top:8px;color:var(--muted)} .pad.passed .mult{color:var(--green)}.pad.current .mult{color:var(--accent1)}
   .frog{position:absolute;top:104px;font-size:34px;transition:.45s cubic-bezier(.22,1,.36,1);filter:drop-shadow(0 6px 8px rgba(0,0,0,.6));z-index:3}
-  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
-  .bigmult{font-weight:700;font-size:58px;line-height:1;text-shadow:0 0 22px currentColor;color:var(--accent1);opacity:0;transition:.2s}.bigmult.show{opacity:1}
-  .toast{font-family:var(--mono);font-size:14px;margin-top:6px;color:#fff;opacity:0;transition:.2s}.toast.show{opacity:1}
-  .splash{position:absolute;font-size:40px;opacity:0;transition:.3s;z-index:4}.splash.show{opacity:1;animation:pop .5s}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;transition:background .2s}
+  .overlay.result{background:rgba(11,12,16,.80);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  .bigmult{font-weight:800;font-size:52px;line-height:1;letter-spacing:-.02em;color:var(--accent1);opacity:0;transition:.2s;text-shadow:0 6px 20px rgba(0,0,0,.55)}.bigmult.show{opacity:1}
+  .toast{font-family:var(--mono);font-size:13px;margin-top:10px;color:#c8ccd6;opacity:0;transition:.2s}.toast.show{opacity:1}
+  /* live running multiplier: small chip pinned to top so it never covers the lanes */
+  .overlay.live{justify-content:flex-start;padding-top:12px;background:transparent}
+  .overlay.live .bigmult{font-size:19px;font-weight:700;padding:4px 13px;border-radius:999px;background:rgba(21,23,29,.9);border:1px solid var(--line);text-shadow:none;color:var(--accent1)}
+  .overlay.live .toast{display:none}
+  .splash{display:none}
   @keyframes pop{0%{transform:scale(.4)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
   .cashout{font-family:var(--mono);font-size:12px;color:var(--gold)}
 </style>
@@ -47,7 +52,7 @@
     <div class="track" id="track"></div>
     <div class="frog" id="frog" style="display:none">🧑‍🚀</div>
     <div class="splash" id="splash"></div>
-    <div class="overlay"><div class="bigmult" id="bigmult">1.00×</div><div class="toast" id="toast"></div></div>
+    <div class="overlay" id="overlay"><div class="bigmult" id="bigmult">1.00×</div><div class="toast" id="toast"></div></div>
   </div>
   <div class="cs-fair" id="fair">provably fair · the meteor's lane is hidden server-side</div>
 
@@ -94,14 +99,14 @@ function connect(){ ws=new WebSocket(RGS);
 function handle(m){ switch(m.type){
   case "welcome": diffs=m.difficulties; $("bal").textContent=fmt(m.balance); state="idle"; renderDiffs(); buttons(); setState("ready","is-idle"); setStatus("pick a difficulty, set your bet, and climb"); break;
   case "run_open": run={...m.run,lane:0}; $("bal").textContent=fmt(m.balance); state="running"; buildTrack(); buttons();
-    $("bigmult").classList.remove("show"); $("toast").classList.remove("show"); $("splash").classList.remove("show"); $("bigmult").style.color=""; $("cashval").textContent="—";
+    $("bigmult").classList.remove("show"); $("toast").classList.remove("show"); $("splash").classList.remove("show"); $("overlay").classList.remove("result","live"); $("bigmult").style.color=""; $("cashval").textContent="—";
     $("fair").innerHTML=`fair commit <b>${run.commitment.slice(0,16)}…</b>`; setState("climbing · "+run.difficulty,"is-live"); setStatus("hop to the next lane or cash out"); break;
   case "hop": run.lane=m.lane; markPad(m.lane,"current"); for(let i=1;i<m.lane;i++)markPad(i,"passed"); positionFrog(m.lane);
-    $("bigmult").textContent=m.multiplier.toFixed(2)+"×"; $("bigmult").classList.add("show"); $("cashval").textContent="cash "+fmt(Math.floor(curStake()*m.multiplier)); buttons(); break;
+    $("overlay").classList.add("live"); $("overlay").classList.remove("result"); $("bigmult").style.color=""; $("bigmult").textContent=m.multiplier.toFixed(2)+"×"; $("bigmult").classList.add("show"); $("cashval").textContent="cash "+fmt(Math.floor(curStake()*m.multiplier)); buttons(); break;
   case "run_over":{ const r=m.reveal;
     if(m.status==="rugged"){ markPad(m.lane,"hazard"); const p=$("pad"+m.lane); if(p)p.querySelector(".stone").textContent="☄️"; positionFrog(m.lane); $("frog").textContent="💀";
-      $("bigmult").textContent="LOST"; $("bigmult").style.color="var(--rug)"; $("bigmult").classList.add("show"); showSplash("💥"); $("toast").textContent=`meteor on lane ${m.lane}`; $("toast").classList.add("show"); setState("rugged","is-lose"); setStatus(`lost on lane ${m.lane} · void was ${r.failLane}`); }
-    else { $("frog").textContent="🧑‍🚀"; $("bigmult").style.color="var(--green)"; $("bigmult").textContent="+"+fmt(m.payout); $("bigmult").classList.add("show"); showSplash("🎉"); $("toast").textContent=`cashed ${m.multiplier.toFixed(2)}× on lane ${m.lane}`; $("toast").classList.add("show"); setState("cashed "+m.multiplier.toFixed(2)+"×","is-win"); setStatus(`cashed out for ${fmt(m.payout)} credits`); }
+      $("overlay").classList.remove("live"); $("overlay").classList.add("result"); $("bigmult").textContent="LOST"; $("bigmult").style.color="var(--rug)"; $("bigmult").classList.add("show"); showSplash("💥"); $("toast").textContent=`meteor on lane ${m.lane}`; $("toast").classList.add("show"); setState("rugged","is-lose"); setStatus(`lost on lane ${m.lane} · void was ${r.failLane}`); }
+    else { $("overlay").classList.remove("live"); $("overlay").classList.add("result"); $("frog").textContent="🧑‍🚀"; $("bigmult").style.color="var(--green)"; $("bigmult").textContent="+"+fmt(m.payout); $("bigmult").classList.add("show"); showSplash("🎉"); $("toast").textContent=`cashed ${m.multiplier.toFixed(2)}× on lane ${m.lane}`; $("toast").classList.add("show"); setState("cashed "+m.multiplier.toFixed(2)+"×","is-win"); setStatus(`cashed out for ${fmt(m.payout)} credits`); }
     $("bal").textContent=fmt(m.balance); $("fair").innerHTML=`revealed <b>${r.serverSeed.slice(0,16)}…</b> · hazard lane <b>${r.failLane}</b> · SHA-256=commit <span class="ok">✓</span>`; $("frog").textContent="🧑‍🚀"; state="idle"; run=null; buttons(); break; }
   case "error": setStatus("⚠ "+m.message); if(state!=="running")state="idle"; buttons(); break; } }
 function curStake(){ return Math.round(parseFloat($("bet").value||"0")*MINOR); }
