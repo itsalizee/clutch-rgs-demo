@@ -36,6 +36,8 @@ import { PlinkoEngine } from "../games/plinko/engine.js";
 import { PlinkoOrchestrator, attachPlinkoWs, plinkoHttpRoutes } from "../games/plinko/server.js";
 import { OriginalsEngine } from "../games/originals/engine.js";
 import { OriginalsOrchestrator, attachOriginalsWs, originalsHttpRoutes } from "../games/originals/server.js";
+import { RouletteEngine } from "../games/roulette/engine.js";
+import { RouletteOrchestrator, attachRouletteWs, rouletteHttpRoutes } from "../games/roulette/server.js";
 import { minor, MixedEntropySource, BlockHashEntropyProvider } from "../engine/index.js";
 
 const PORT = Number(process.env.PORT ?? 8080);
@@ -128,6 +130,17 @@ const originalsOrchestrator = new OriginalsOrchestrator({
   ensureDemoSession: (sid) => wallet.ensureSession(sid),
 });
 
+// ---- Roulette (European single-zero) ---------------------------------------
+const rouletteEngine = new RouletteEngine({
+  randomBytes: (n) => webcrypto.getRandomValues(new Uint8Array(n)),
+  chainLength: Number(process.env.CHAIN_LENGTH ?? 50_000),
+  entropy: new MixedEntropySource(),
+});
+const rouletteOrchestrator = new RouletteOrchestrator({
+  engine: rouletteEngine, wallet, operator, txLog: new MemoryTxLog(),
+  ensureDemoSession: (sid) => wallet.ensureSession(sid),
+});
+
 // ---- Static file serving ---------------------------------------------------
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
@@ -161,8 +174,10 @@ const crossRoutes = crossHttpRoutes(() => crossEngine.fairness);
 const vaultRoutes = vaultHttpRoutes(() => vaultEngine.fairness);
 const plinkoRoutes = plinkoHttpRoutes(() => plinkoEngine.fairness);
 const originalsRoutes = originalsHttpRoutes(() => originalsEngine.fairness);
+const rouletteRoutes = rouletteHttpRoutes(() => rouletteEngine.fairness);
 
 const http = createServer((req, res) => {
+  if (rouletteRoutes(req, res)) return;  // /fairness/roulette
   if (originalsRoutes(req, res)) return;  // /fairness/originals
   if (plinkoRoutes(req, res)) return;    // /fairness/plinko
   if (vaultRoutes(req, res)) return;     // /fairness/vault
@@ -177,11 +192,13 @@ const crossWss = new WebSocketServer({ noServer: true });
 const vaultWss = new WebSocketServer({ noServer: true });
 const plinkoWss = new WebSocketServer({ noServer: true });
 const originalsWss = new WebSocketServer({ noServer: true });
+const rouletteWss = new WebSocketServer({ noServer: true });
 attachCrashWs(crashWss, games, DEFAULT_GAME_ID);
 attachCrossWs(crossWss, crossOrchestrator);
 attachVaultWs(vaultWss, vaultOrchestrator);
 attachPlinkoWs(plinkoWss, plinkoOrchestrator);
 attachOriginalsWs(originalsWss, originalsOrchestrator);
+attachRouletteWs(rouletteWss, rouletteOrchestrator);
 
 http.on("upgrade", (req, socket, head) => {
   const path = (req.url ?? "").split("?")[0]!;
@@ -193,6 +210,8 @@ http.on("upgrade", (req, socket, head) => {
     plinkoWss.handleUpgrade(req, socket, head, (ws) => plinkoWss.emit("connection", ws, req));
   } else if (path === "/ws/originals") {
     originalsWss.handleUpgrade(req, socket, head, (ws) => originalsWss.emit("connection", ws, req));
+  } else if (path === "/ws/roulette") {
+    rouletteWss.handleUpgrade(req, socket, head, (ws) => rouletteWss.emit("connection", ws, req));
   } else if (path === "/ws" || path === "/ws/ascent") {
     crashWss.handleUpgrade(req, socket, head, (ws) => crashWss.emit("connection", ws, req));
   } else {
