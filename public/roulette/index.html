@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Roulette — provably-fair European</title>
+<title>Roulette — provably-fair American</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -37,7 +37,7 @@
   .stage{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;
     background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;
     box-shadow:inset 0 0 60px rgba(0,0,0,.45)}
-  .wheelwrap{position:relative;width:250px;height:250px;flex:0 0 auto;margin:0 auto}
+  .wheelwrap{position:relative;width:340px;height:340px;flex:0 0 auto;margin:0 auto}
   .wheelwrap svg{display:block;width:100%;height:100%}
   #rotor{transform-box:fill-box;transform-origin:center;transition:transform 4.6s cubic-bezier(.16,.84,.3,1)}
   #ballArm{transform-box:fill-box;transform-origin:center;transition:transform 4.6s cubic-bezier(.16,.84,.3,1)}
@@ -66,7 +66,8 @@
   .cell:active{transform:scale(.97)}
   .cell.num.red{background:var(--red);color:#fff}
   .cell.num.black{background:var(--blk);color:#eef0f5;border-color:#2c313c}
-  .cell.zero{grid-column:1;grid-row:1/4;background:var(--acc);color:#08130e;font-size:18px;writing-mode:vertical-rl;transform:rotate(180deg)}
+  .zerocol{grid-column:1;grid-row:1/4;display:flex;flex-direction:column;gap:4px}
+  .cell.zero{flex:1;background:var(--acc);color:#08130e;font-size:16px;font-weight:800}
   .cell.out{background:var(--panel2);color:var(--mut);font-size:11px;font-weight:700;letter-spacing:.5px;border-color:var(--line);text-transform:uppercase}
   .cell.out .sw{width:13px;height:13px;border-radius:3px;display:inline-block;vertical-align:middle;margin-left:2px}
   .cell.col2{grid-column:14;font-size:11px}
@@ -112,7 +113,7 @@
   @media(max-width:560px){
     .stage{grid-template-columns:1fr;justify-items:center;text-align:center}
     .readout{align-items:center}
-    .wheelwrap{width:230px;height:230px}
+    .wheelwrap{width:300px;height:300px}
   }
 </style>
 </head>
@@ -132,7 +133,7 @@
       <svg viewBox="0 0 200 200" id="wheelsvg" aria-hidden="true"></svg>
     </div>
     <div class="readout">
-      <div class="resultbig"><div class="num" id="resNum" style="color:var(--dim)">—</div><div class="tag" id="resTag">European · single zero · 2.70% edge</div></div>
+      <div class="resultbig"><div class="num" id="resNum" style="color:var(--dim)">—</div><div class="tag" id="resTag">American · double zero · 5.26% edge</div></div>
       <div class="netline" id="net">pick a chip, place bets, then spin</div>
       <div class="history" id="history"></div>
     </div>
@@ -161,10 +162,12 @@ const $ = id => document.getElementById(id);
 const fmt = n => n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 
 /* ---------- wheel model (display only — the SERVER decides the number) ---------- */
-const WHEEL = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const DZ = 37; // "00" pocket sentinel
+const WHEEL = [0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24,36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2];
 const RED = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
-const colorOf = n => n===0 ? "green" : (RED.has(n) ? "red" : "black");
-const SEC = 360/37;
+const colorOf = n => (n===0||n===DZ) ? "green" : (RED.has(n) ? "red" : "black");
+const disp = n => n===DZ ? "00" : String(n);
+const SEC = 360/38;
 
 /* ---------- state ---------- */
 let balance = 0;                 // CREDITS — server-authoritative (welcome + each result)
@@ -188,9 +191,11 @@ const nkey  = a => [...a].sort((x,y)=>x-y).join("-");
 /* ---------- build felt ---------- */
 function buildTable(){
   const t = $("table"); t.innerHTML="";
-  const z=document.createElement("div"); z.className="cell zero num green"; z.textContent="0";
-  z.onclick=()=>place("s:0","Straight 0",z);
-  t.appendChild(z); cellRef[0]=z;
+  // American double-zero column: 0 (top) and 00 (bottom)
+  const zc=document.createElement("div"); zc.className="zerocol";
+  const z0=document.createElement("div"); z0.className="cell zero num green"; z0.textContent="0"; z0.onclick=()=>place("s:0","Straight 0",z0); cellRef[0]=z0;
+  const z00=document.createElement("div"); z00.className="cell zero num green"; z00.textContent="00"; z00.onclick=()=>place("s:00","Straight 00",z00); cellRef[DZ]=z00;
+  zc.appendChild(z0); zc.appendChild(z00); t.appendChild(zc);
   for(let c=1;c<=12;c++) for(let r=0;r<=2;r++){
     const n=numAt(r,c); const cell=document.createElement("div");
     cell.className=`cell num ${colorOf(n)}`; cell.textContent=n;
@@ -247,9 +252,10 @@ function buildSpots(){
   // six-lines
   for(let c=1;c<=11;c++){ const a=numAt(0,c),b=numAt(0,c+1); const A=R(a),B=R(b);
     spot((A.l+A.w+B.l)/2,A.t,`ln:${c}`,`Six-line ${c}`); }
-  // zero splits
-  [2,1,0].forEach(r=>{ const n=numAt(r,1); const N=R(n);
-    spot(N.l,N.cy,`sp:${nkey([0,n])}`,`Split 0/${n}`); });
+  // 0/00 split (border between the two green cells) + American top line (0-00-1-2-3)
+  const Z0=R(0), Z00=R(DZ);
+  spot(Z0.cx,(Z0.t+Z0.h+Z00.t)/2,`sp:${nkey([0,DZ])}`,`Split 0/00`);
+  spot(Z0.l+Z0.w,(Z0.t+Z0.h+Z00.t)/2,`fl:top`,`Top line 0-00-1-2-3`);
   renderChips();
 }
 
@@ -319,7 +325,7 @@ function buildWheel(){
     rotor+=`<path d="M${x0} ${y0} A${rO} ${rO} 0 0 1 ${x1} ${y1} L${xi1} ${yi1} A${rI} ${rI} 0 0 0 ${xi0} ${yi0} Z" fill="${col}" stroke="#0b0c10" stroke-width=".6"/>`;
     const am=((i+0.5)*SEC-90)*Math.PI/180; const tx=cx+rT*Math.cos(am),ty=cy+rT*Math.sin(am);
     const rot=(i+0.5)*SEC; const tc=colorOf(n)==="green"?"#08130e":"#fff";
-    rotor+=`<text x="${tx}" y="${ty}" fill="${tc}" font-size="8" font-weight="700" text-anchor="middle" dominant-baseline="central" transform="rotate(${rot} ${tx} ${ty})">${n}</text>`;
+    rotor+=`<text x="${tx}" y="${ty}" fill="${tc}" font-size="8.4" font-weight="800" text-anchor="middle" dominant-baseline="central" transform="rotate(${rot} ${tx} ${ty})">${disp(n)}</text>`;
   });
   rotor+=`<circle cx="100" cy="100" r="62" fill="none" stroke="#0b0c10" stroke-width="2"/></g>`;
   const hub=`<circle cx="100" cy="100" r="40" fill="#12141a" stroke="#2c313c"/><circle cx="100" cy="100" r="6" fill="#2ee6a0"/>`;
@@ -351,7 +357,7 @@ function handle(m){
     case "welcome":
       balance = m.balance/MINOR; ready=true; syncBal(); updateTotals();
       flashState("place your bets",""); $("net").textContent="pick a chip, place bets, then spin";
-      setFair(`provably fair · single-zero European · edge 1/37 · <a href="/fairness/roulette" target="_blank" rel="noopener">fairness ↗</a>`);
+      setFair(`provably fair · double-zero American · edge 2/38 · <a href="/fairness/roulette" target="_blank" rel="noopener">fairness ↗</a>`);
       break;
     case "result":
       spinWheelTo(m.number);
@@ -381,8 +387,8 @@ function spin(){
 
 function settle(m){
   const r=m.number, col=colorOf(r);
-  $("resNum").textContent=r; $("resNum").className="num "+col; $("resNum").style.color="";
-  $("resTag").textContent = r===0 ? "zero" : `${col} · ${r%2? "odd":"even"} · ${r<=18?"1-18":"19-36"}`;
+  $("resNum").textContent=disp(r); $("resNum").className="num "+col; $("resNum").style.color="";
+  $("resTag").textContent = (r===0||r===DZ) ? "zero" : `${col} · ${r%2? "odd":"even"} · ${r<=18?"1-18":"19-36"}`;
   balance = m.balance/MINOR; syncBal();
   const net = (m.totalReturn - m.totalStake)/MINOR;
   const nEl=$("net");
@@ -393,7 +399,7 @@ function settle(m){
   const winKeys=new Set((m.results||[]).filter(x=>x.win).map(x=>x.key));
   document.querySelectorAll(".chip").forEach(c=>{ if(winKeys.has(c.dataset.key)) c.classList.add("win"); });
   // history
-  const h=document.createElement("div"); h.className="hchip "+col; h.textContent=r;
+  const h=document.createElement("div"); h.className="hchip "+col; h.textContent=disp(r);
   $("history").prepend(h); while($("history").children.length>16) $("history").lastChild.remove();
   // fairness reveal
   setFair(`spin #${m.nonce} · number <b>${r}</b> · sha256(serverSeed)=commit <span class="ok">✓</span> · seed <b>${m.reveal.serverSeed.slice(0,16)}…</b> · <a href="/fairness/roulette" target="_blank" rel="noopener">verify ↗</a>`);
